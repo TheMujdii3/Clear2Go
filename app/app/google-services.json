@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "341512314786",
+    "firebase_url": "https://clear2go1-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "clear2go1",
+    "storage_bucket": "clear2go1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:341512314786:android:afdb4b15734e6b20301cfb",
+        "android_client_info": {
+          "package_name": "com.example.clear2go"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCZ0fkpQKgW-YTz1xDwa47-Q8HjtOH2iBg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
