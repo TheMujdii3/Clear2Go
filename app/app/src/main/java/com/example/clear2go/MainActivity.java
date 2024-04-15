@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAnchorView(R.id.fab)
                         .setAction("Action", null).show();
+                writeMessageToDatabase(databaseRef,"merge cumva ");
             }
         });
         binding.button.setOnClickListener(new View.OnClickListener() {
@@ -59,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
 
                 // Call the writeMessageToDatabase function to write a message to the database
-                writeMessageToDatabase(databaseRef, "Hello Firebase!");
+                writeMessageToDatabase(databaseRef, "bine baaaaaaaaaaaaaaa");
             }
         });
 
