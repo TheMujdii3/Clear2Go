@@ -59,14 +59,6 @@ public class MainActivity extends AppCompatActivity {
         databaseRef = FirebaseDatabase.getInstance().getReference().child("messages");
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        /*
-        GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-        googleSignInClient = GoogleSignIn.getClient(this,googleSignInOptions);
-
-         */
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -94,7 +86,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onActigvityResult (int requestCode, int resultCode, @Nullable Intent data)
+    protected void onActivityResult (int requestCode, int resultCode, @Nullable Intent data)
     {
         super.onActivityResult(requestCode,resultCode,data);
         if(requestCode==RC_SIGN_IN)

@@ -5,22 +5,27 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:gravity="center"
     tools:context=".ProfileActivity">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="pana mea" />
-    <TextView
-        android:layout_width="wrap_content"
-        android:text="Email"
-        android:layout_height="wrap_content"
-        android:id="@+id/emailTv"/>
+        android:background="?attr/colorPrimary"
+        android:baselineAligned="false"
+
+        android:minHeight="?attr/actionBarSize"
+        android:theme="?attr/actionBarTheme" />
+
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="match_parent"
+        android:layout_height="186dp" />
+
     <Button
-        android:layout_width="wrap_content"
+        android:id="@+id/button3"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/logout"
-        android:layout_marginTop="20dp"
-        android:text="Logout"/>
+        android:text="Let's fly" />
+
 </LinearLayout>
