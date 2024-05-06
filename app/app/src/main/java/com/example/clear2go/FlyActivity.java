@@ -214,7 +214,7 @@ public class FlyActivity extends AppCompatActivity implements LocationListener, 
 
             }
         });
-        
+
          */
     }
 
