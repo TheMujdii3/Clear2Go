@@ -5,33 +5,95 @@
     android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@android:color/background_dark"
     tools:context=".FlyActivity">
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/engOn"
         android:layout_width="133dp"
         android:layout_height="84dp"
-        android:text="Button"
+        android:text="Pornire motor"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/button5"
+        android:id="@+id/taxi"
         android:layout_width="133dp"
         android:layout_height="84dp"
-        android:layout_marginTop="160dp"
-        android:text="Button"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:layout_editor_absoluteX="0dp" />
+        android:layout_marginTop="76dp"
+        android:text="Rulaj"
+
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/engOn" />
 
     <Button
-        android:id="@+id/button6"
+        android:id="@+id/line_in"
         android:layout_width="133dp"
         android:layout_height="84dp"
-        android:layout_marginTop="320dp"
-        android:layout_marginEnd="596dp"
-        android:text="Button"
+        android:layout_marginTop="52dp"
+        android:text="Intrare   aliniere"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/taxi"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <Button
+        android:id="@+id/Takeoff"
+        android:layout_width="133dp"
+        android:layout_height="84dp"
+        android:layout_marginTop="4dp"
+        android:text="Plecare"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/land"
+        android:layout_width="133dp"
+        android:layout_height="84dp"
+        android:layout_marginTop="72dp"
+        android:text="Aterizare"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Takeoff" />
+
+    <Button
+        android:id="@+id/exit"
+        android:layout_width="105dp"
+        android:layout_height="65dp"
+        android:text="exit"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/land"
+        app:layout_constraintVertical_bias="1.0" />
+
+    <com.ekn.gruzer.gaugelibrary.ArcGauge
+        android:id="@+id/arcGauge"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="264dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/Alti"
+        android:layout_width="130dp"
+        android:layout_height="26dp"
+        android:layout_marginEnd="36dp"
+        android:text="Altitudine relativa"
+        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+        app:layout_constraintEnd_toEndOf="@+id/arcGauge"
+        app:layout_constraintTop_toBottomOf="@+id/arcGauge" />
+
+    <TextView
+        android:id="@+id/altM"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="20dp"
+        android:text="altM"
+        app:layout_constraintStart_toStartOf="@+id/Alti"
+        app:layout_constraintTop_toBottomOf="@+id/Alti" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

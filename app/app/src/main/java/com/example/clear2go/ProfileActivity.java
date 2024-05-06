@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Toast;
@@ -36,7 +37,7 @@ public class ProfileActivity extends AppCompatActivity {
     private static final String TAG="GOOGLE_SIGN_IN_TAG";
     private ActivityProfileBinding binding;
     String[] avioane ={"YR-5659","YR-PBJ","YR-5600","YR-5657"};
-
+    String selectedPlane;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,14 +74,27 @@ public class ProfileActivity extends AppCompatActivity {
                 Log.d(TAG, "onCancelled: database error");
             }
         });
+        selectPlane.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedPlane = (String) parent.getItemAtPosition(position);
+                // Do something with the selectedName
+            }
 
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // Handle no selection case (optional)
+            }
+        });
 
 
         binding.button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Toast.makeText(ProfileActivity.this,"merge avionu..."+selectPlane.getSelectedItem(),Toast.LENGTH_SHORT).show();
-
+                Intent intent = new Intent(ProfileActivity.this, FlyActivity.class);
+                intent.putExtra("avion",selectedPlane);
+                startActivity(intent);
             }
         });
     }
