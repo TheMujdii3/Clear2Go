@@ -1,10 +1,12 @@
 package com.example.clear2go;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -43,7 +45,7 @@ public class FlyActivity extends AppCompatActivity implements LocationListener, 
     private DatabaseReference mDatabase;
     private DatabaseReference avionData;
     private DatabaseReference rq;
-
+    public boolean motor=false,rulaj=false,aliniat=false,decolat=false,aterizat=false;
     Sensor pressureSensor ;
     String avion;
     @Override
@@ -64,31 +66,37 @@ public class FlyActivity extends AppCompatActivity implements LocationListener, 
         binding.engOn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                rq.child(avion).setValue("Pornire motor "+avion);
+                rq.child(avion).child("Pornire motor").setValue(false);
+                binding.engOn.setBackgroundColor( Color.parseColor("#FFA500"));
             }
         });
         binding.taxi.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                rq.child(avion).setValue("Rulaj "+avion);
+                rq.child(avion).child("Rulaj").setValue(false);
+                binding.taxi.setBackgroundColor(Color.parseColor("#FFA500"));
             }
         });
         binding.lineIn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                rq.child(avion).setValue("Intrare si aliniere "+avion);
+                rq.child(avion).child("Intrare si aliniere").setValue(false);
+                binding.lineIn.setBackgroundColor( Color.parseColor("#FFA500"));
             }
         });
         binding.Takeoff.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                rq.child(avion).setValue("Decolare "+avion);
+                rq.child(avion).child("Plecare").setValue(false);
+                binding.Takeoff.setBackgroundColor(Color.parseColor("#FFA500"));
             }
         });
         binding.land.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                rq.child(avion).setValue("Aterizare "+avion);
+                //rq.child(avion).setValue("Aterizare "+avion);
+                rq.child(avion).child("Aterizare").setValue(false);
+                binding.land.setBackgroundColor(Color.parseColor("#FFA500"));
             }
         });
         FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/"+avion+"/Rulaj").addValueEventListener(new ValueEventListener() {
@@ -96,14 +104,16 @@ public class FlyActivity extends AppCompatActivity implements LocationListener, 
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists())
                 {
-                    if(snapshot.getValue(boolean.class)==true && binding.engOn.isActivated()) {
+                    if(snapshot.getValue(boolean.class)==true) {
                         binding.taxi.setBackgroundColor(-16711936);
                         binding.taxi.setActivated(true);
+                        rulaj=true;
                         //Toast.makeText(FlyActivity.this,"merge",Toast.LENGTH_SHORT).show();
                     }
                     else {
                         binding.taxi.setBackgroundColor(-65536);
                         binding.taxi.setActivated(false);
+                        rulaj=false;
                     }
                 }
             }
@@ -121,10 +131,11 @@ public class FlyActivity extends AppCompatActivity implements LocationListener, 
                     if(snapshot.getValue(boolean.class)==true) {
                         binding.engOn.setBackgroundColor(-16711936);
                         binding.engOn.setActivated(true);
-                        //Toast.makeText(FlyActivity.this,"merge",Toast.LENGTH_SHORT).show();
+                        motor=true;
                     }
                     else {
                         binding.engOn.setActivated(false);
+                        motor=false;
                         binding.engOn.setBackgroundColor(-65536);
                     }
                 }
@@ -144,9 +155,11 @@ public class FlyActivity extends AppCompatActivity implements LocationListener, 
                         binding.lineIn.setBackgroundColor(-16711936);
                         //Toast.makeText(FlyActivity.this,"merge",Toast.LENGTH_SHORT).show();
                         binding.lineIn.setActivated(true);
+                        aliniat=true;
                     }
                     else{
                         binding.lineIn.setActivated(false);
+                        aliniat=false;
                         binding.lineIn.setBackgroundColor(-65536);
                     }
                 }
@@ -157,19 +170,21 @@ public class FlyActivity extends AppCompatActivity implements LocationListener, 
 
             }
         });
-        FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/"+avion+"/Decolare").addValueEventListener(new ValueEventListener() {
+        FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/"+avion+"/Plecare").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists())
                 {
-                    if(snapshot.getValue(boolean.class)==true) {
+                    if(snapshot.getValue(boolean.class)==true ) {
                         binding.Takeoff.setBackgroundColor(-16711936);
+                        decolat=true;
                         binding.Takeoff.setActivated(true);
                         //Toast.makeText(FlyActivity.this,"merge",Toast.LENGTH_SHORT).show();
                     }
                     else {
                         binding.Takeoff.setActivated(false);
                         binding.Takeoff.setBackgroundColor(-65536);
+                        decolat=false;
                     }
                 }
             }
@@ -184,13 +199,15 @@ public class FlyActivity extends AppCompatActivity implements LocationListener, 
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists())
                 {
-                    if(snapshot.getValue(boolean.class)==true) {
+                    if(snapshot.getValue(boolean.class)==true ) {
                         binding.land.setBackgroundColor(-16711936);
                         binding.land.setActivated(true);
+                        aterizat=true;
                         //Toast.makeText(FlyActivity.this,"merge",Toast.LENGTH_SHORT).show();
                     }
                     else{
                         binding.land.setActivated(false);
+                        aterizat=false;
                         binding.land.setBackgroundColor(-65536);
                     }
                 }
@@ -201,21 +218,7 @@ public class FlyActivity extends AppCompatActivity implements LocationListener, 
 
             }
         });
-        /*FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Stop fortat)").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(snapshot.getValue(boolean.class)==true)
-                    binding.getRoot().setBackgroundColor(-65536);
 
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
-         */
     }
 
 

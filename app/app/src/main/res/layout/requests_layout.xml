@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/requester"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:text="TextView" />
+
+        <TextView
+            android:id="@+id/request"
+            android:layout_width="match_parent"
+            android:layout_height="32dp"
+            android:text="TextView" />
+
+        <Button
+            android:id="@+id/denyRq"
+            android:layout_width="191dp"
+            android:layout_height="wrap_content"
+            android:text="Deny" />
+
+        <Button
+            android:id="@+id/allowRq"
+            android:layout_width="191dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="200dp"
+            android:layout_marginTop="-50dp"
+            android:text="Allow" />
+
+    </LinearLayout>
+
+</LinearLayout>
