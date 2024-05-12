@@ -5,21 +5,18 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.hardware.Sensor;
-import android.hardware.SensorManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.example.clear2go.databinding.ActivityFlyBinding;
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationServices;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -32,13 +29,10 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
     private FirebaseAuth firebaseAuth;
     private static final int REQUEST_LOCATION_CODE = 1;
     private LocationManager locationManager;
-    private SensorManager sensorManager;
     ActivityFlyBinding binding;
-    private FusedLocationProviderClient locationClient;
     private DatabaseReference mDatabase;
     private DatabaseReference avionData;
     private DatabaseReference rq;
-    Sensor pressureSensor;
     String avion;
 
     @Override
@@ -49,22 +43,21 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
         binding = ActivityFlyBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        locationClient = LocationServices.getFusedLocationProviderClient(this);
+
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        pressureSensor = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_CODE);
             locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 0, 0, this);
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
             }else {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             }
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
         mDatabase = FirebaseDatabase.getInstance().getReference();
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser user = firebaseAuth.getCurrentUser();
@@ -234,6 +227,24 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
             }
         });
 
+        binding.exit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                locationManager.removeUpdates(FlyActivity.this);
+                Intent intent = new Intent(FlyActivity.this, ProfileActivity.class);
+                startActivity(intent);
+                finish();
+            }
+        });
+        getOnBackPressedDispatcher().
+                addCallback(this, new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        Intent intent = new Intent(FlyActivity.this, ProfileActivity.class);
+                        startActivity(intent);
+                        finish();
+                    }
+                });
     }
 
 

@@ -25,7 +25,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class ControlActivity extends AppCompatActivity implements OnMapReadyCallback {
@@ -70,7 +69,7 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
         planesMap=new HashMap<>();
 
         fetchRequests();
-        binding.mapB.setActivated(false);
+        binding.mapB.setActivated(true);
         binding.mapB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -91,8 +90,12 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
         positions.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for(DataSnapshot planeSnapshot:snapshot.getChildren())
-                        planesMap.put(planeSnapshot.getKey(), new obj(new LatLng((Double) planeSnapshot.child("lat").getValue(), (Double) planeSnapshot.child("lng").getValue())));
+                    if(snapshot.exists())
+                    for(DataSnapshot planeSnapshot:snapshot.getChildren()) {
+                        //Toast.makeText(ControlActivity.this, planeSnapshot.getKey(), Toast.LENGTH_SHORT).show();
+                        //Log.d("Planes pos", "onDataChange: "+planeSnapshot.getKey());
+                        //planesMap.put(planeSnapshot.getKey(), new obj(new LatLng((Double) planeSnapshot.child("lat").getValue(), (Double) planeSnapshot.child("lng").getValue())));
+                    }
             }
 
             @Override
