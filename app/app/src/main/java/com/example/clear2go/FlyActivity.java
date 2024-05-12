@@ -12,7 +12,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,24 +30,16 @@ import com.google.firebase.database.ValueEventListener;
 
 public class FlyActivity extends AppCompatActivity implements LocationListener {
     private FirebaseAuth firebaseAuth;
-    private TextView speedTextView;
-    private TextView altitudeTextView;
     private static final int REQUEST_LOCATION_CODE = 1;
-    private
-    LocationManager locationManager;
+    private LocationManager locationManager;
     private SensorManager sensorManager;
-    private float currentSpeed = 0.0f;
-    private double currentAltitude = 0.0;
-
     ActivityFlyBinding binding;
     private FusedLocationProviderClient locationClient;
     private DatabaseReference mDatabase;
     private DatabaseReference avionData;
     private DatabaseReference rq;
-    public boolean motor = false, rulaj = false, aliniat = false, decolat = false, aterizat = false;
     Sensor pressureSensor;
     String avion;
-    Location lastKnownLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +48,7 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
         avion = start.getStringExtra("avion");
         binding = ActivityFlyBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
         locationClient = LocationServices.getFusedLocationProviderClient(this);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -66,11 +58,8 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_CODE);
             locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                // Request location updates
                 locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 0, 0, this);
-
             }else {
-                // Request the ACCESS_FINE_LOCATION permission
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             }
         }
@@ -81,7 +70,7 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
         FirebaseUser user = firebaseAuth.getCurrentUser();
         rq = mDatabase.getDatabase().getReference().child("Requests");
         avionData = mDatabase.getDatabase().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/" + avion);
-        
+
         binding.engOn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -96,7 +85,6 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                     if (snapshot.getValue(boolean.class) == true) {
                         binding.engOn.setBackgroundColor(-16711936);
                         binding.engOn.setActivated(true);
-                        motor = true;
                         binding.taxi.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -111,7 +99,6 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                                     if (snapshot.getValue(boolean.class) == true) {
                                         binding.taxi.setBackgroundColor(-16711936);
                                         binding.taxi.setActivated(true);
-                                        rulaj = true;
                                         binding.lineIn.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
@@ -126,7 +113,6 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                                                     if (snapshot.getValue(boolean.class) == true) {
                                                         binding.lineIn.setBackgroundColor(-16711936);
                                                         binding.lineIn.setActivated(true);
-                                                        aliniat = true;
                                                         binding.Takeoff.setOnClickListener(new View.OnClickListener() {
                                                             @Override
                                                             public void onClick(View v) {
@@ -140,7 +126,6 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                                                                 if (snapshot.exists()) {
                                                                     if (snapshot.getValue(boolean.class) == true) {
                                                                         binding.Takeoff.setBackgroundColor(-16711936);
-                                                                        decolat = true;
                                                                         binding.Takeoff.setActivated(true);
                                                                         binding.land.setOnClickListener(new View.OnClickListener() {
                                                                             @Override
@@ -157,10 +142,8 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                                                                                     if (snapshot.getValue(boolean.class) == true) {
                                                                                         binding.land.setBackgroundColor(-16711936);
                                                                                         binding.land.setActivated(true);
-                                                                                        aterizat = true;
                                                                                     } else {
                                                                                         binding.land.setActivated(false);
-                                                                                        aterizat = false;
                                                                                         binding.land.setBackgroundColor(-65536);
                                                                                     }
                                                                                 }
@@ -174,10 +157,8 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                                                                     } else {
                                                                         binding.Takeoff.setActivated(false);
                                                                         binding.Takeoff.setBackgroundColor(-65536);
-                                                                        decolat = false;
 
                                                                         binding.land.setActivated(false);
-                                                                        aterizat = false;
                                                                         binding.land.setBackgroundColor(-65536);
                                                                     }
                                                                 }
@@ -190,15 +171,12 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                                                         });
                                                     } else {
                                                         binding.lineIn.setActivated(false);
-                                                        aliniat = false;
                                                         binding.lineIn.setBackgroundColor(-65536);
 
                                                         binding.Takeoff.setActivated(false);
                                                         binding.Takeoff.setBackgroundColor(-65536);
-                                                        decolat = false;
 
                                                         binding.land.setActivated(false);
-                                                        aterizat = false;
                                                         binding.land.setBackgroundColor(-65536);
                                                     }
                                                 }
@@ -212,18 +190,14 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                                     } else {
                                         binding.taxi.setBackgroundColor(-65536);
                                         binding.taxi.setActivated(false);
-                                        rulaj = false;
 
                                         binding.lineIn.setActivated(false);
-                                        aliniat = false;
                                         binding.lineIn.setBackgroundColor(-65536);
 
                                         binding.Takeoff.setActivated(false);
                                         binding.Takeoff.setBackgroundColor(-65536);
-                                        decolat = false;
 
                                         binding.land.setActivated(false);
-                                        aterizat = false;
                                         binding.land.setBackgroundColor(-65536);
                                     }
                                 }
@@ -236,23 +210,18 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                         });
                     } else {
                         binding.engOn.setActivated(false);
-                        motor = false;
                         binding.engOn.setBackgroundColor(-65536);
 
                         binding.taxi.setBackgroundColor(-65536);
                         binding.taxi.setActivated(false);
-                        rulaj = false;
 
                         binding.lineIn.setActivated(false);
-                        aliniat = false;
                         binding.lineIn.setBackgroundColor(-65536);
 
                         binding.Takeoff.setActivated(false);
                         binding.Takeoff.setBackgroundColor(-65536);
-                        decolat = false;
 
                         binding.land.setActivated(false);
-                        aterizat = false;
                         binding.land.setBackgroundColor(-65536);
 
                     }
@@ -265,16 +234,15 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
             }
         });
 
-
     }
 
 
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        //binding.alti.setText((int) location.getAltitude());
-        //Toast.makeText(this, "alti updated", Toast.LENGTH_SHORT).show();
         binding.alt.setText(String.valueOf((int)location.getAltitude()));
         binding.speed.setText(String.valueOf((int)location.getSpeed()));
+        avionData.child("lat").setValue(location.getLatitude());
+        avionData.child("lng").setValue(location.getLongitude());
     }
 }

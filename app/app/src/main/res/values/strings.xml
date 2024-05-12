@@ -6,5 +6,6 @@
     <string name="second_fragment_label">Second Fragment</string>
     <string name="next">Next</string>
     <string name="previous">Previous</string>
+    <string name="my_maps_key">AIzaSyApneNViwqMo-I_W5I_7hryJQcuwK_y8Uo</string>
     <string name="default_web_client_id">341512314786-uliaqjhemph8hcju0d9ojkle2hh7vdcd.apps.googleusercontent.com</string>
 </resources>
