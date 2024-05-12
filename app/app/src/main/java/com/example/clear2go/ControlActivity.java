@@ -26,6 +26,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ControlActivity extends AppCompatActivity implements OnMapReadyCallback {
     private DatabaseReference mData;
@@ -38,7 +39,13 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
     private ArrayList<Request> da;
     GoogleMap myMap;
     Button denyBt;
-    List<objectOnMap> planes;
+    private class obj{
+        LatLng latLng;
+        public obj(LatLng latLng) {
+            this.latLng = latLng;
+        }
+    }
+    private Map<String,obj> planesMap;
     ConstraintLayout.LayoutParams mapParams;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,7 +67,7 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
         adapter = new controlRecycleAdapter(new ArrayList<>());
         recyclerView.setAdapter(adapter);
 
-        planes=new ArrayList<>();
+        planesMap=new HashMap<>();
 
         fetchRequests();
         binding.mapB.setActivated(false);
@@ -84,17 +91,15 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
         positions.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot child:snapshot.getChildren())
-                {
-
-                }
+                    for(DataSnapshot planeSnapshot:snapshot.getChildren())
+                        planesMap.put(planeSnapshot.getKey(), new obj(new LatLng((Double) planeSnapshot.child("lat").getValue(), (Double) planeSnapshot.child("lng").getValue())));
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
-        })
+        });
 
     }
 
