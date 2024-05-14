@@ -3,6 +3,7 @@ package com.example.clear2go;
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
@@ -10,6 +11,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 
 import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
@@ -42,22 +44,23 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
         avion = start.getStringExtra("avion");
         binding = ActivityFlyBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        //WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_CODE);
             locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 0, 0, this);
+                //locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 0, 0, this);
                 //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
             }else {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             }
         }
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+        //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
         mDatabase = FirebaseDatabase.getInstance().getReference();
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser user = firebaseAuth.getCurrentUser();
@@ -231,15 +234,38 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
             @Override
             public void onClick(View v) {
                 locationManager.removeUpdates(FlyActivity.this);
+                locationManager=null;
+                mDatabase=null;
+                FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/" + avion + "/Pornire motor")
+                        .setValue(false);
                 Intent intent = new Intent(FlyActivity.this, ProfileActivity.class);
                 startActivity(intent);
-                finish();
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                FlyActivity.this.finish();
+                try {
+                    FlyActivity.this.finalize();
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    super.finalize();
+                } catch (Throwable e) {
+                    throw new RuntimeException(e);
+                }
+                FlyActivity.super.finishActivity(1);
+                FlyActivity.super.finish();
+
             }
         });
         getOnBackPressedDispatcher().
                 addCallback(this, new OnBackPressedCallback(true) {
                     @Override
                     public void handleOnBackPressed() {
+                        FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/" + avion + "/Pornire motor")
+                                .setValue(false);
+                        locationManager.removeUpdates(FlyActivity.this);
+                        locationManager=null;
+                        mDatabase=null;
                         Intent intent = new Intent(FlyActivity.this, ProfileActivity.class);
                         startActivity(intent);
                         finish();
@@ -255,5 +281,6 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
         binding.speed.setText(String.valueOf((int)location.getSpeed()));
         avionData.child("lat").setValue(location.getLatitude());
         avionData.child("lng").setValue(location.getLongitude());
+        avionData.child("heading").setValue(location.getBearing());
     }
 }

@@ -1,6 +1,8 @@
 package com.example.clear2go;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -33,11 +35,13 @@ public class ProfileActivity extends AppCompatActivity {
     private static final String TAG="GOOGLE_SIGN_IN_TAG";
     private ActivityProfileBinding binding;
     String selectedPlane;
+    @SuppressLint("SourceLockedOrientationActivity")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding  = ActivityProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         Toolbar toolbar = binding.toolbar;
         setSupportActionBar(toolbar);
         mDatabase= FirebaseDatabase.getInstance().getReference();
@@ -95,6 +99,7 @@ public class ProfileActivity extends AppCompatActivity {
                 Intent intent = new Intent(ProfileActivity.this, FlyActivity.class);
                 intent.putExtra("avion", (String) selectPlane.getSelectedItem());
                 startActivity(intent);
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
                 finish();
             }
         });
@@ -103,6 +108,8 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(ProfileActivity.this,ControlActivity.class));
+                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                finish();
             }
         });
 

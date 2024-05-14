@@ -1,12 +1,21 @@
 package com.example.clear2go;
 
+import android.content.Intent;
+import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
+import android.transition.ChangeBounds;
+import android.transition.TransitionManager;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
@@ -18,6 +27,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -46,11 +57,13 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
     private Map<String, Marker> planeMarkers = new HashMap<>();
     private class obj{
         LatLng latLng;
+        double heading;
         String plane;
-        public obj(LatLng latLng,String plane) {
-            this.latLng = latLng;this.plane=plane;
+        public obj(LatLng latLng,double heading,String plane) {
+            this.latLng = latLng;this.plane=plane;this.heading=heading;
         }
     }
+    private boolean isMapExpanded = false;
     private Map<String,obj> planesMap;
     ConstraintLayout.LayoutParams mapParams;
     @Override
@@ -58,6 +71,8 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
         super.onCreate(savedInstanceState);
         binding = ActivityControlBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         mData= FirebaseDatabase.getInstance().getReference();
         requests=mData.getDatabase().getReference().child("Requests");
         positions=mData.getDatabase().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane");
@@ -77,6 +92,7 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
 
         fetchRequests();
         binding.mapB.setActivated(true);
+        /*
         binding.mapB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -94,6 +110,34 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
             }
         });
 
+         */
+
+
+        /*
+
+         */
+        binding.mapB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isMapExpanded) {
+                    TransitionManager.beginDelayedTransition((ViewGroup) binding.getRoot(), new ChangeBounds());
+                    binding.map.setLayoutParams(mapParams);
+                    binding.mapB.setActivated(false);
+                } else {
+                    ConstraintLayout.LayoutParams layoutParams = new ConstraintLayout.LayoutParams(
+                            ConstraintLayout.LayoutParams.MATCH_PARENT,
+                            ConstraintLayout.LayoutParams.MATCH_PARENT
+                    );
+                    TransitionManager.beginDelayedTransition((ViewGroup) binding.getRoot(), new ChangeBounds());
+                    binding.map.setLayoutParams(layoutParams);
+                    binding.mapB.setActivated(true);
+                }
+                isMapExpanded = !isMapExpanded;
+            }
+        });
+
+
+
         positions.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -102,15 +146,9 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
                         planesMap.put(planeSnapshot.getKey(),
                                 new obj(
                                         new LatLng((Double) planeSnapshot.child("lat").getValue(),
-                                                (Double) planeSnapshot.child("lng").getValue()),
+                                                (Double) planeSnapshot.child("lng").getValue()),planeSnapshot.child("heading").getValue(Double.class),
                                         planeSnapshot.getKey())
                         );
-                        //Log.d("pos changed", "onDataChange: s a schimbat poziti unui avion "+planeSnapshot.getKey()+planesMap.size());
-                        /*planesMap.values().stream().filter(plane -> snapshot.getKey() == plane.plane.toString()).forEach(plane -> plane.latLng = new LatLng((Double) planeSnapshot.child("lat").getValue(),
-                                (Double) planeSnapshot.child("lng")
-                                        .getValue()));
-
-                         */
                     }
             }
 
@@ -119,7 +157,16 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
 
             }
         });
-
+        getOnBackPressedDispatcher().
+                addCallback(this, new OnBackPressedCallback(true) {
+                    @Override
+                    public void handleOnBackPressed() {
+                        Intent intent = new Intent(ControlActivity.this, ProfileActivity.class);
+                        startActivity(intent);
+                        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                        finish();
+                    }
+                });
 
         objUpdateThread.start();
     }
@@ -135,7 +182,7 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
                             planesMap.put(planeSnapshot.getKey(),
                                     new obj(
                                             new LatLng((Double) planeSnapshot.child("lat").getValue(),
-                                                    (Double) planeSnapshot.child("lng").getValue()),
+                                                    (Double) planeSnapshot.child("lng").getValue()),planeSnapshot.child("heading").getValue(Double.class),
                                             planeSnapshot.getKey())
                             );
                             if (planeSnapshot.getKey().toString() == object.plane.toString()) {
@@ -178,6 +225,7 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
                         String planeKey = planeSnapshot.getKey();
                         double lat = planeSnapshot.child("lat").getValue(Double.class);
                         double lng = planeSnapshot.child("lng").getValue(Double.class);
+                        double heading = planeSnapshot.child("heading").getValue(Double.class);
                         LatLng newPosition = new LatLng(lat, lng);
 
                         obj object = planesMap.get(planeKey);
@@ -185,8 +233,9 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
                             Marker marker = planeMarkers.get(planeKey);
                             if (marker != null) {
                                 LatLng oldPosition = marker.getPosition();
-                                if (!newPosition.equals(oldPosition)) {
-                                   animateMarker(marker,newPosition);
+                                float oldRotation = marker.getRotation();
+                                if (!newPosition.equals(oldPosition) || oldRotation != (float) heading) {
+                                    animateMarker(marker,newPosition,(float)heading);
                                 }
                             }
                         }
@@ -219,7 +268,7 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
         }
     });
 
-    private void animateMarker(final Marker marker, final LatLng toPosition) {
+    private void animateMarker(final Marker marker, final LatLng toPosition,final float toRotation) {
         final Handler handler = new Handler();
         final long start = SystemClock.uptimeMillis();
         final long duration = 500; // Animation duration in milliseconds
@@ -233,10 +282,13 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
                 float t = interpolator.getInterpolation((float) elapsed / duration);
                 double lng = t * toPosition.longitude + (1 - t) * marker.getPosition().longitude;
                 double lat = t * toPosition.latitude + (1 - t) * marker.getPosition().latitude;
+                float rotation = (t * toRotation  + (1 - t) * marker.getRotation());
                 marker.setPosition(new LatLng(lat, lng));
+                marker.setRotation(rotation);
+
+
 
                 if (t < 1.0) {
-                    // Post again 16ms later (60 frames per second)
                     handler.postDelayed(this, 16);
                 }
             }
@@ -281,12 +333,16 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
         myMap.moveCamera(CameraUpdateFactory
                 .newLatLngZoom(new LatLng(44.360977, 25.934749), 10)
         );
-
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.plane2, new BitmapFactory.Options() {{
+            inSampleSize = 8;
+        }});
+        BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
         for (obj plane : planesMap.values()) {
             LatLng location = new LatLng(plane.latLng.latitude, plane.latLng.longitude);
             Marker marker = myMap.addMarker(new MarkerOptions()
                     .position(location)
                     .title(plane.plane.toString())
+                    .icon(icon)
             );
             planeMarkers.put(plane.plane.toString(), marker);
             marker.setTag(planesMap.get(marker.getId()));
