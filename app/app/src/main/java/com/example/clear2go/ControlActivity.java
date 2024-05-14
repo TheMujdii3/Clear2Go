@@ -1,7 +1,10 @@
 package com.example.clear2go;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.SystemClock;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 
 import androidx.annotation.NonNull;
@@ -17,6 +20,8 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,10 +43,12 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
     private ArrayList<Request> da;
     GoogleMap myMap;
     Button denyBt;
+    private Map<String, Marker> planeMarkers = new HashMap<>();
     private class obj{
         LatLng latLng;
-        public obj(LatLng latLng) {
-            this.latLng = latLng;
+        String plane;
+        public obj(LatLng latLng,String plane) {
+            this.latLng = latLng;this.plane=plane;
         }
     }
     private Map<String,obj> planesMap;
@@ -90,11 +97,20 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
         positions.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if(snapshot.exists())
+                if(snapshot.exists())
                     for(DataSnapshot planeSnapshot:snapshot.getChildren()) {
-                        //Toast.makeText(ControlActivity.this, planeSnapshot.getKey(), Toast.LENGTH_SHORT).show();
-                        //Log.d("Planes pos", "onDataChange: "+planeSnapshot.getKey());
-                        //planesMap.put(planeSnapshot.getKey(), new obj(new LatLng((Double) planeSnapshot.child("lat").getValue(), (Double) planeSnapshot.child("lng").getValue())));
+                        planesMap.put(planeSnapshot.getKey(),
+                                new obj(
+                                        new LatLng((Double) planeSnapshot.child("lat").getValue(),
+                                                (Double) planeSnapshot.child("lng").getValue()),
+                                        planeSnapshot.getKey())
+                        );
+                        //Log.d("pos changed", "onDataChange: s a schimbat poziti unui avion "+planeSnapshot.getKey()+planesMap.size());
+                        /*planesMap.values().stream().filter(plane -> snapshot.getKey() == plane.plane.toString()).forEach(plane -> plane.latLng = new LatLng((Double) planeSnapshot.child("lat").getValue(),
+                                (Double) planeSnapshot.child("lng")
+                                        .getValue()));
+
+                         */
                     }
             }
 
@@ -104,6 +120,127 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
             }
         });
 
+
+        objUpdateThread.start();
+    }
+    private void updateObjectPositions() {
+        for (obj object : planesMap.values()) {
+            Marker marker = planeMarkers.get(object.plane.toString());
+
+            positions.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    if (snapshot.exists())
+                        for (DataSnapshot planeSnapshot : snapshot.getChildren()) {
+                            planesMap.put(planeSnapshot.getKey(),
+                                    new obj(
+                                            new LatLng((Double) planeSnapshot.child("lat").getValue(),
+                                                    (Double) planeSnapshot.child("lng").getValue()),
+                                            planeSnapshot.getKey())
+                            );
+                            if (planeSnapshot.getKey().toString() == object.plane.toString()) {
+                                if (marker.getPosition() != (new LatLng((Double) planeSnapshot.child("lat").getValue(), (Double) planeSnapshot.child("lng").getValue()))) {
+                                    marker.setPosition(new LatLng((Double) planeSnapshot.child("lat").getValue(),
+                                            (Double) planeSnapshot.child("lng").getValue()));
+                                }
+                            }
+                        }
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+            //}
+        }
+
+    }
+    Thread ObjUpdate = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            while (true) {
+                updateObjectPositions();
+                try {
+                    Thread.sleep(250); // Update positions every second
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    });
+    private void updateObjectPositions1() {
+        positions.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    for (DataSnapshot planeSnapshot : snapshot.getChildren()) {
+                        String planeKey = planeSnapshot.getKey();
+                        double lat = planeSnapshot.child("lat").getValue(Double.class);
+                        double lng = planeSnapshot.child("lng").getValue(Double.class);
+                        LatLng newPosition = new LatLng(lat, lng);
+
+                        obj object = planesMap.get(planeKey);
+                        if (object != null) {
+                            Marker marker = planeMarkers.get(planeKey);
+                            if (marker != null) {
+                                LatLng oldPosition = marker.getPosition();
+                                if (!newPosition.equals(oldPosition)) {
+                                   animateMarker(marker,newPosition);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                // Handle onCancelled
+            }
+        });
+    }
+    Thread objUpdateThread = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            while (true) {
+                long startTime = System.currentTimeMillis();
+
+                updateObjectPositions1();
+
+                long elapsedTime = System.currentTimeMillis() - startTime;
+                long sleepTime = Math.max(0, 500 - elapsedTime); // Ensure actualization every half a second
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    });
+
+    private void animateMarker(final Marker marker, final LatLng toPosition) {
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        final long duration = 500; // Animation duration in milliseconds
+
+        final LinearInterpolator interpolator = new LinearInterpolator();
+
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed / duration);
+                double lng = t * toPosition.longitude + (1 - t) * marker.getPosition().longitude;
+                double lat = t * toPosition.latitude + (1 - t) * marker.getPosition().latitude;
+                marker.setPosition(new LatLng(lat, lng));
+
+                if (t < 1.0) {
+                    // Post again 16ms later (60 frames per second)
+                    handler.postDelayed(this, 16);
+                }
+            }
+        });
     }
 
     private void fetchRequests() {
@@ -122,14 +259,12 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
                     }
                 }
 
-                // Update adapter with retrieved requests
                 adapter.updateDataSet(requests1);
 
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-                // Handle any errors
             }
 
         });
@@ -139,10 +274,29 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         myMap = googleMap;
-        myMap.addCircle(new CircleOptions().center(new LatLng(44.360977,25.934749)).radius(6000));
-        myMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(44.360977,25.934749),10));
+        myMap.addCircle(new CircleOptions()
+                .center(new LatLng(44.360977, 25.934749))
+                .radius(6000)
+        );
+        myMap.moveCamera(CameraUpdateFactory
+                .newLatLngZoom(new LatLng(44.360977, 25.934749), 10)
+        );
 
-
+        for (obj plane : planesMap.values()) {
+            LatLng location = new LatLng(plane.latLng.latitude, plane.latLng.longitude);
+            Marker marker = myMap.addMarker(new MarkerOptions()
+                    .position(location)
+                    .title(plane.plane.toString())
+            );
+            planeMarkers.put(plane.plane.toString(), marker);
+            marker.setTag(planesMap.get(marker.getId()));
+        }
 
     }
+
+
+
 }
+
+
+

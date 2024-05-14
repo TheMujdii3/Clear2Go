@@ -1,6 +1,5 @@
     package com.example.clear2go;
 
-    import android.content.ClipData;
     import android.view.LayoutInflater;
     import android.view.View;
     import android.view.ViewGroup;
@@ -10,7 +9,6 @@
     import androidx.annotation.NonNull;
     import androidx.recyclerview.widget.RecyclerView;
 
-    import com.google.firebase.database.DatabaseReference;
     import com.google.firebase.database.FirebaseDatabase;
 
     import java.util.ArrayList;
@@ -55,11 +53,11 @@
                 public void onClick(View v) {
                     FirebaseDatabase.getInstance().getReference().child("Requests/"+plane+"/"+rq).removeValue();
                     FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/"+plane+"/"+rq).setValue(false);
-                    MyViewHolder holder = (MyViewHolder) v.getTag();  // Assuming you set a tag on the view holder
+                    MyViewHolder holder = (MyViewHolder) v.getTag();
                     if (holder != null && positionMap.containsKey(holder)) {
                         int position = positionMap.get(holder);
                         removeItem(position);
-                        positionMap.remove(holder);  // Remove from map after removal
+                        positionMap.remove(holder);
                     }
                 }
             });
@@ -68,11 +66,11 @@
                 public void onClick(View v) {
                     FirebaseDatabase.getInstance().getReference().child("Requests/"+plane+"/"+rq).removeValue();
                     FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/"+plane+"/"+rq).setValue(true);
-                    MyViewHolder holder = (MyViewHolder) v.getTag();  // Assuming you set a tag on the view holder
+                    MyViewHolder holder = (MyViewHolder) v.getTag();
                     if (holder != null && positionMap.containsKey(holder)) {
                         int position = positionMap.get(holder);
                         removeItem(position);
-                        positionMap.remove(holder);  // Remove from map after removal
+                        positionMap.remove(holder);
                     }
                 }
             });
@@ -102,52 +100,7 @@
     }
 
 
-    /*
-    public class controlRecycleAdapter extends RecyclerView.Adapter<controlRecycleAdapter.MyViewHolder> {
-        private HashMap<String, Request> requests;  // Use HashMap to store requests with key (requestId)
 
-        public controlRecycleAdapter(HashMap<String, Request> requests) {
-            this.requests = requests;
-        }
-
-        public class MyViewHolder extends RecyclerView.ViewHolder {
-            private TextView requestName, requestValue;
-
-            public MyViewHolder(@NonNull View itemView) {
-                super(itemView);
-                requestName = itemView.findViewById(R.id.requester); // Assuming separate TextViews for name and value
-                requestValue = itemView.findViewById(R.id.request);
-            }
-        }
-
-        @NonNull
-        @Override
-        public controlRecycleAdapter.MyViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.requests_layout, parent, false);
-            return new MyViewHolder(itemView);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull controlRecycleAdapter.MyViewHolder holder, int position) {
-            // Extract request data based on position (assuming order is maintained)
-            for (Map.Entry<String, Request> entry : requests.entrySet()) {
-                holder.requestName.setText(entry.getKey()); // Set request name (key)
-                holder.requestValue.setText(entry.getValue().getRequest()); // Set request value
-                break; // Exit after setting data for the current position
-            }
-        }
-
-        public void updateDataSet(HashMap<String, Request> requests) {
-            this.requests = requests;
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public int getItemCount() {
-            return requests.size();
-        }
-
-     */
 
 
 

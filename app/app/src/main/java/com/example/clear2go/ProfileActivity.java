@@ -59,7 +59,6 @@ public class ProfileActivity extends AppCompatActivity {
                     updatedAvioane.add(airplaneCode);
                 }
 
-                // Update the adapter with the new data
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(ProfileActivity.this, android.R.layout.simple_spinner_item, updatedAvioane);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 adapter.notifyDataSetChanged();
