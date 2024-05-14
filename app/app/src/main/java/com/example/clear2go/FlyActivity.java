@@ -54,13 +54,13 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
             locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
                 //locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 0, 0, this);
-                //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
             }else {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             }
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+       // locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
         mDatabase = FirebaseDatabase.getInstance().getReference();
         firebaseAuth = FirebaseAuth.getInstance();
         FirebaseUser user = firebaseAuth.getCurrentUser();
@@ -277,8 +277,8 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        binding.alt.setText(String.valueOf((int)location.getAltitude()));
-        binding.speed.setText(String.valueOf((int)location.getSpeed()));
+        binding.alt.setText(String.valueOf((int)location.getAltitude()*3.28084));
+        binding.speed.setText(String.valueOf((int)location.getSpeed()*3600/1000));
         avionData.child("lat").setValue(location.getLatitude());
         avionData.child("lng").setValue(location.getLongitude());
         avionData.child("heading").setValue(location.getBearing());

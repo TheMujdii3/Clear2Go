@@ -49,9 +49,7 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
     private DatabaseReference positions;
     ActivityControlBinding binding;
     RecyclerView recyclerView;
-    private HashMap<String, Request> requestsMap;
     private controlRecycleAdapter adapter;
-    private ArrayList<Request> da;
     GoogleMap myMap;
     Button denyBt;
     private Map<String, Marker> planeMarkers = new HashMap<>();
@@ -112,10 +110,6 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
 
          */
 
-
-        /*
-
-         */
         binding.mapB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -135,8 +129,6 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
                 isMapExpanded = !isMapExpanded;
             }
         });
-
-
 
         positions.addValueEventListener(new ValueEventListener() {
             @Override

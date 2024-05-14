@@ -65,42 +65,25 @@
         app:layout_constraintTop_toBottomOf="@+id/land"
         app:layout_constraintVertical_bias="1.0" />
 
-    <com.ekn.gruzer.gaugelibrary.ArcGauge
-        android:id="@+id/arcGauge"
-        android:layout_width="200dp"
-        android:layout_height="200dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="264dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/Alti"
-        android:layout_width="130dp"
-        android:layout_height="26dp"
-        android:layout_marginEnd="36dp"
-        android:text="Altitudine relativa"
-        android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        app:layout_constraintEnd_toEndOf="@+id/arcGauge"
-        app:layout_constraintTop_toBottomOf="@+id/arcGauge" />
-
     <TextView
         android:id="@+id/alt"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="40dp"
-        android:layout_marginEnd="336dp"
+        android:layout_marginTop="132dp"
+        android:layout_marginEnd="256dp"
         android:text="Altitudine STD"
+        android:textSize="34sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Alti" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/speed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="36dp"
-        android:layout_marginEnd="16dp"
+        android:layout_marginTop="72dp"
+        android:layout_marginEnd="60dp"
         android:text="Viteza"
+        android:textSize="34sp"
         app:layout_constraintEnd_toEndOf="@+id/alt"
         app:layout_constraintTop_toBottomOf="@+id/alt" />
 
