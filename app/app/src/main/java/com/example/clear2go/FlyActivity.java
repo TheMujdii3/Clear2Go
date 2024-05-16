@@ -45,7 +45,6 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
         binding = ActivityFlyBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-        //WindowManager windowManager = (WindowManager) getSystemService(Context.WINDOW_SERVICE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
@@ -53,13 +52,13 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_CODE);
             locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                //locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 0, 0, this);
+                locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 0, 0, this);
                 locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
             }else {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
             }
         }
-       // locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
         mDatabase = FirebaseDatabase.getInstance().getReference();
         firebaseAuth = FirebaseAuth.getInstance();
@@ -234,6 +233,7 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
             @Override
             public void onClick(View v) {
                 locationManager.removeUpdates(FlyActivity.this);
+                //locationManager.removeUpdates(super.this);
                 locationManager=null;
                 mDatabase=null;
                 FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/" + avion + "/Pornire motor")
@@ -277,8 +277,8 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
 
     @Override
     public void onLocationChanged(@NonNull Location location) {
-        binding.alt.setText(String.valueOf((int)location.getAltitude()*3.28084));
-        binding.speed.setText(String.valueOf((int)location.getSpeed()*3600/1000));
+        binding.alt.setText(String.valueOf((int)((int)location.getAltitude()*3.28084))+"ft");
+        binding.speed.setText(String.valueOf((int)location.getSpeed()*3600/1000)+"km/h");
         avionData.child("lat").setValue(location.getLatitude());
         avionData.child("lng").setValue(location.getLongitude());
         avionData.child("heading").setValue(location.getBearing());

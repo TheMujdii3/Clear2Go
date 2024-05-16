@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
@@ -27,12 +28,14 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.AdvancedMarkerOptions;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.GroundOverlay;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -63,7 +66,10 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
     }
     private boolean isMapExpanded = false;
     private Map<String,obj> planesMap;
+    private Map<String, GroundOverlay> planeOverlays = new HashMap<>();
     ConstraintLayout.LayoutParams mapParams;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,26 +96,6 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
 
         fetchRequests();
         binding.mapB.setActivated(true);
-        /*
-        binding.mapB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(binding.mapB.isActivated()) {
-                    binding.map.setLayoutParams(new ConstraintLayout.LayoutParams(
-                            ConstraintLayout.LayoutParams.MATCH_PARENT,
-                            ConstraintLayout.LayoutParams.MATCH_PARENT
-                    ));
-                    binding.mapB.setActivated(false);
-                }
-                else {
-                    binding.map.setLayoutParams(mapParams);
-                    binding.mapB.setActivated(true);
-                }
-            }
-        });
-
-         */
-
         binding.mapB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -162,46 +148,19 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
 
         objUpdateThread.start();
     }
-    private void updateObjectPositions() {
-        for (obj object : planesMap.values()) {
-            Marker marker = planeMarkers.get(object.plane.toString());
 
-            positions.addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    if (snapshot.exists())
-                        for (DataSnapshot planeSnapshot : snapshot.getChildren()) {
-                            planesMap.put(planeSnapshot.getKey(),
-                                    new obj(
-                                            new LatLng((Double) planeSnapshot.child("lat").getValue(),
-                                                    (Double) planeSnapshot.child("lng").getValue()),planeSnapshot.child("heading").getValue(Double.class),
-                                            planeSnapshot.getKey())
-                            );
-                            if (planeSnapshot.getKey().toString() == object.plane.toString()) {
-                                if (marker.getPosition() != (new LatLng((Double) planeSnapshot.child("lat").getValue(), (Double) planeSnapshot.child("lng").getValue()))) {
-                                    marker.setPosition(new LatLng((Double) planeSnapshot.child("lat").getValue(),
-                                            (Double) planeSnapshot.child("lng").getValue()));
-                                }
-                            }
-                        }
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-            //}
-        }
-
-    }
-    Thread ObjUpdate = new Thread(new Runnable() {
+    Thread objUpdateThread = new Thread(new Runnable() {
         @Override
         public void run() {
             while (true) {
-                updateObjectPositions();
+                long startTime = System.currentTimeMillis();
+
+                updateObjectPositions1();
+
+                long elapsedTime = System.currentTimeMillis() - startTime;
+                long sleepTime = Math.max(0, 500 - elapsedTime); // Ensure actualization every half a second
                 try {
-                    Thread.sleep(250); // Update positions every second
+                    Thread.sleep(sleepTime);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -222,12 +181,12 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
 
                         obj object = planesMap.get(planeKey);
                         if (object != null) {
-                            Marker marker = planeMarkers.get(planeKey);
-                            if (marker != null) {
-                                LatLng oldPosition = marker.getPosition();
-                                float oldRotation = marker.getRotation();
+                            GroundOverlay overlay = planeOverlays.get(planeKey);
+                            if (overlay != null) {
+                                LatLng oldPosition = overlay.getPosition();
+                                float oldRotation = overlay.getBearing();
                                 if (!newPosition.equals(oldPosition) || oldRotation != (float) heading) {
-                                    animateMarker(marker,newPosition,(float)heading);
+                                    animateOverlay(overlay, newPosition, (float) heading, planeMarkers.get(planeKey));
                                 }
                             }
                         }
@@ -241,29 +200,36 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
             }
         });
     }
-    Thread objUpdateThread = new Thread(new Runnable() {
-        @Override
-        public void run() {
-            while (true) {
-                long startTime = System.currentTimeMillis();
+    private void animateOverlay(final GroundOverlay overlay, final LatLng toPosition, final float toRotation,final Marker marker) {
+        final Handler handler = new Handler();
+        final long start = SystemClock.uptimeMillis();
+        final long duration = 500;
 
-                updateObjectPositions1();
+        final LinearInterpolator interpolator = new LinearInterpolator();
 
-                long elapsedTime = System.currentTimeMillis() - startTime;
-                long sleepTime = Math.max(0, 500 - elapsedTime); // Ensure actualization every half a second
-                try {
-                    Thread.sleep(sleepTime);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                long elapsed = SystemClock.uptimeMillis() - start;
+                float t = interpolator.getInterpolation((float) elapsed / duration);
+                double lng = t * toPosition.longitude + (1 - t) * overlay.getPosition().longitude;
+                double lat = t * toPosition.latitude + (1 - t) * overlay.getPosition().latitude;
+                float rotation = t * toRotation + (1 - t) * overlay.getBearing();
+                overlay.setPosition(new LatLng(lat, lng));
+                overlay.setDimensions(15000f-750*myMap.getCameraPosition().zoom,15000f-750*myMap.getCameraPosition().zoom);
+                overlay.setBearing(rotation);
+                marker.setPosition(new LatLng(lat, lng));
+
+                if (t < 1.0) {
+                    handler.postDelayed(this, 16);
                 }
             }
-        }
-    });
-
+        });
+    }
     private void animateMarker(final Marker marker, final LatLng toPosition,final float toRotation) {
         final Handler handler = new Handler();
         final long start = SystemClock.uptimeMillis();
-        final long duration = 500; // Animation duration in milliseconds
+        final long duration = 500;
 
         final LinearInterpolator interpolator = new LinearInterpolator();
 
@@ -277,8 +243,6 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
                 float rotation = (t * toRotation  + (1 - t) * marker.getRotation());
                 marker.setPosition(new LatLng(lat, lng));
                 marker.setRotation(rotation);
-
-
 
                 if (t < 1.0) {
                     handler.postDelayed(this, 16);
@@ -314,7 +278,6 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
         });
 
     }
-
     @Override
     public void onMapReady(@NonNull GoogleMap googleMap) {
         myMap = googleMap;
@@ -325,19 +288,37 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
         myMap.moveCamera(CameraUpdateFactory
                 .newLatLngZoom(new LatLng(44.360977, 25.934749), 10)
         );
+
+
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.mipmap.plane2, new BitmapFactory.Options() {{
-            inSampleSize = 8;
+            inSampleSize = 1;
         }});
         BitmapDescriptor icon = BitmapDescriptorFactory.fromBitmap(bitmap);
+
         for (obj plane : planesMap.values()) {
             LatLng location = new LatLng(plane.latLng.latitude, plane.latLng.longitude);
-            Marker marker = myMap.addMarker(new MarkerOptions()
-                    .position(location)
-                    .title(plane.plane.toString())
-                    .icon(icon)
+            GroundOverlay overlay = myMap.addGroundOverlay(new GroundOverlayOptions()
+                    .position(location, 15000f, 15000f)
+                    .image(icon)
+                    .bearing((float) plane.heading)
+
             );
-            planeMarkers.put(plane.plane.toString(), marker);
-            marker.setTag(planesMap.get(marker.getId()));
+            planeOverlays.put(plane.plane, overlay);
+
+            Bitmap bitmap2 = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap2);
+            canvas.drawBitmap(BitmapFactory.decodeResource(getResources(), R.mipmap.plane2), 25, 25, null);
+
+            BitmapDescriptor icon2 = BitmapDescriptorFactory.fromBitmap(bitmap2);
+            Marker marker1 = myMap.addMarker(new AdvancedMarkerOptions()
+                    .position(location)
+                    .flat(true)
+                    .icon(icon2)
+                    .visible(true)
+                    .title(plane.plane.toString()));
+            planeMarkers.put(plane.plane.toString(),marker1);
+
+
         }
 
     }
@@ -345,6 +326,3 @@ public class ControlActivity extends AppCompatActivity implements OnMapReadyCall
 
 
 }
-
-
-
