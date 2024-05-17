@@ -63,6 +63,8 @@ dependencies {
     implementation("com.google.android.gms:play-services-auth:21.1.1")
     implementation ("com.github.Gruzer:simple-gauge-android:0.3.1")
     implementation ("com.google.maps.android:android-maps-utils:3.8.2")
+    implementation ("com.google.firebase:firebase-analytics")
+
 
 
 }

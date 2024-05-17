@@ -2,8 +2,16 @@ package com.example.clear2go;
 
 import android.content.Intent;
 import android.os.Bundle;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import android.util.Log;
+import android.view.View;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+
+import com.example.clear2go.databinding.ActivityMainBinding;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -11,28 +19,8 @@ import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.snackbar.Snackbar;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.provider.ContactsContract;
-import android.util.Log;
-import android.view.View;
-
-import androidx.navigation.NavController;
-import androidx.navigation.Navigation;
-import androidx.navigation.ui.AppBarConfiguration;
-import androidx.navigation.ui.NavigationUI;
-
-import com.example.clear2go.databinding.ActivityMainBinding;
-
-import android.view.Menu;
-import android.view.MenuItem;
-import android.widget.Toast;
-
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.analytics.FirebaseAnalytics;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
@@ -46,6 +34,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private FirebaseAuth mAuth;
+    private FirebaseAnalytics mFirebaseAnalytics;
     private DatabaseReference databaseRef;
     private static final int RC_SIGN_IN  =100;
     private static final String TAG="GOOGLE_SIGN_IN_TAG";
@@ -56,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         checkuser();
         FirebaseApp.initializeApp(this);
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
         databaseRef = FirebaseDatabase.getInstance().getReference().child("messages");
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -72,7 +62,11 @@ public class MainActivity extends AppCompatActivity {
                 startActivityForResult(intent,RC_SIGN_IN);
             }
         });
-
+        Bundle bundle = new Bundle();
+        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, "my screen classs");
+        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, "my custom screen name");
+        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "pana mea");
+        mFirebaseAnalytics.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW, bundle);
     }
 
     private void checkuser()
@@ -128,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
                             Toast.makeText(MainActivity.this,"existing user...\n"+email,Toast.LENGTH_SHORT).show();
 
                         }
+
                         startActivity(new Intent(MainActivity.this, ProfileActivity.class));
                         finish();
                     }
