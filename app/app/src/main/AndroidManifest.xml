@@ -10,9 +10,9 @@
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
-        android:icon="@mipmap/plane"
+        android:icon="@mipmap/ic_launcher_plane3"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/plane"
+        android:roundIcon="@mipmap/ic_launcher_plane3_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Clear2Go"
         tools:targetApi="31">
