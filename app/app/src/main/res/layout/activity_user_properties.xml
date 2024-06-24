@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".User_properties"
+    tools:layout_editor_absoluteX="126dp"
+    tools:layout_editor_absoluteY="91dp">
+
+    <Switch
+        android:id="@+id/switch1"
+        android:layout_width="160dp"
+        android:layout_height="87dp"
+        android:layout_marginStart="124dp"
+        android:layout_marginTop="88dp"
+        android:text="Admin"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Switch
+        android:id="@+id/switch2"
+        android:layout_width="159dp"
+        android:layout_height="77dp"
+        android:layout_marginStart="124dp"
+        android:layout_marginTop="4dp"
+        android:text="Controlor"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/switch1" />
+
+    <Switch
+        android:id="@+id/switch3"
+        android:layout_width="159dp"
+        android:layout_height="51dp"
+        android:layout_marginStart="124dp"
+        android:layout_marginTop="4dp"
+        android:text="Pilot"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/switch2" />
+
+    <EditText
+        android:id="@+id/uMail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="text"
+        android:text="User mail"
+        app:layout_constraintStart_toStartOf="@+id/switch3"
+        app:layout_constraintTop_toBottomOf="@+id/switch3" />
+
+    <EditText
+        android:id="@+id/uName"
+        android:layout_width="207dp"
+        android:layout_height="43dp"
+        android:ems="10"
+        android:inputType="text"
+        android:text="User name"
+        app:layout_constraintStart_toStartOf="@+id/uMail"
+        app:layout_constraintTop_toBottomOf="@+id/uMail" />
+</androidx.constraintlayout.widget.ConstraintLayout>

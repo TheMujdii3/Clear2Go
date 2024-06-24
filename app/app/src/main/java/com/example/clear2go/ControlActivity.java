@@ -43,6 +43,7 @@
     import com.google.firebase.database.DatabaseReference;
     import com.google.firebase.database.FirebaseDatabase;
     import com.google.firebase.database.ValueEventListener;
+    import com.google.firebase.firestore.FirebaseFirestore;
 
     import java.util.ArrayList;
     import java.util.HashMap;
@@ -50,6 +51,7 @@
 
     public class ControlActivity extends AppCompatActivity implements OnMapReadyCallback {
         private DatabaseReference mData;
+        private FirebaseFirestore db;
         private DatabaseReference requests;
         private DatabaseReference positions;
         FirebaseAnalytics mFirebaseAnalytics;
@@ -224,33 +226,6 @@
                     overlay.setPosition(new LatLng(lat, lng));
                     overlay.setBearing(rotation);
                     marker.setPosition(new LatLng(lat, lng));
-                    /*
-                    myMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
-                        @Override
-                        public void onCameraChange(@NonNull CameraPosition cameraPosition) {
-                            float targetWidth = 10000 * (float) Math.pow(2, 10 - cameraPosition.zoom);
-                            float targetHeight = 10000 * (float) Math.pow(2, 10 - cameraPosition.zoom);
-
-                            ValueAnimator animator = ValueAnimator.ofFloat(0, 1);
-                            animator.setDuration(300);
-                            animator.setInterpolator(interpolator);
-                            animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                                @Override
-                                public void onAnimationUpdate(ValueAnimator animation) {
-                                    float fraction = animation.getAnimatedFraction();
-                                    float currentWidth = overlay.getWidth() + (targetWidth - overlay.getWidth()) * fraction;
-                                    float currentHeight = overlay.getHeight() + (targetHeight - overlay.getHeight()) * fraction;
-                                    overlay.setDimensions(currentWidth, currentHeight);
-                                }
-                            });
-                            animator.start();
-                        }
-                    });
-
-                     */
-
-
-
 
                     if (t < 1.0) {
                         handler.postDelayed(this, 16);

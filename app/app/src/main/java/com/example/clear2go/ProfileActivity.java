@@ -66,7 +66,7 @@ public class ProfileActivity extends AppCompatActivity {
                 ArrayAdapter<String> adapter = new ArrayAdapter<>(ProfileActivity.this, android.R.layout.simple_spinner_item, updatedAvioane);
                 adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                 adapter.notifyDataSetChanged();
-                selectPlane.setAdapter(adapter);
+                selectPlane.setAdapter(adapter);                    
 
                 selectedPlane = (String) selectPlane.getSelectedItem();
             }
@@ -91,6 +91,7 @@ public class ProfileActivity extends AppCompatActivity {
         });
 
          */
+
 
         binding.button3.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -129,6 +130,14 @@ public class ProfileActivity extends AppCompatActivity {
         if(item.getItemId()==R.id.idk1) {
             firebaseAuth.signOut();
             checkUser();
+        }
+        if(item.getItemId()==R.id.User)
+        {
+            Intent intent = new Intent(ProfileActivity.this, User_properties.class);
+            intent.putExtra("user", firebaseAuth.getCurrentUser());
+            startActivity(intent);
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+            finish();
         }
 
         return true;

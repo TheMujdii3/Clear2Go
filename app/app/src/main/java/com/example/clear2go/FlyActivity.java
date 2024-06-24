@@ -27,6 +27,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+
 public class FlyActivity extends AppCompatActivity implements LocationListener {
     private FirebaseAuth firebaseAuth;
     private static final int REQUEST_LOCATION_CODE = 1;
@@ -36,6 +40,7 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
     private DatabaseReference avionData;
     private DatabaseReference rq;
     String avion;
+    Calendar calendar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,15 +67,19 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
         mDatabase = FirebaseDatabase.getInstance().getReference();
         firebaseAuth = FirebaseAuth.getInstance();
+        calendar = Calendar.getInstance();
         FirebaseUser user = firebaseAuth.getCurrentUser();
         rq = mDatabase.getDatabase().getReference().child("Requests");
         avionData = mDatabase.getDatabase().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/" + avion);
+
+        Map<String,Object> comanda = new HashMap<>();
 
         binding.engOn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 rq.child(avion).child("Pornire motor").setValue(false);
                 binding.engOn.setBackgroundColor(Color.parseColor("#FFA500"));
+
             }
         });
         FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/" + avion + "/Pornire motor").addValueEventListener(new ValueEventListener() {
@@ -80,6 +89,7 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                     if (snapshot.getValue(boolean.class) == true) {
                         binding.engOn.setBackgroundColor(-16711936);
                         binding.engOn.setActivated(true);
+
                         binding.taxi.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View v) {
@@ -94,6 +104,7 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                                     if (snapshot.getValue(boolean.class) == true) {
                                         binding.taxi.setBackgroundColor(-16711936);
                                         binding.taxi.setActivated(true);
+
                                         binding.lineIn.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
@@ -108,6 +119,7 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                                                     if (snapshot.getValue(boolean.class) == true) {
                                                         binding.lineIn.setBackgroundColor(-16711936);
                                                         binding.lineIn.setActivated(true);
+
                                                         binding.Takeoff.setOnClickListener(new View.OnClickListener() {
                                                             @Override
                                                             public void onClick(View v) {
@@ -122,6 +134,7 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                                                                     if (snapshot.getValue(boolean.class) == true) {
                                                                         binding.Takeoff.setBackgroundColor(-16711936);
                                                                         binding.Takeoff.setActivated(true);
+
                                                                         binding.land.setOnClickListener(new View.OnClickListener() {
                                                                             @Override
                                                                             public void onClick(View v) {
@@ -137,6 +150,7 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                                                                                     if (snapshot.getValue(boolean.class) == true) {
                                                                                         binding.land.setBackgroundColor(-16711936);
                                                                                         binding.land.setActivated(true);
+
                                                                                     } else {
                                                                                         binding.land.setActivated(false);
                                                                                         binding.land.setBackgroundColor(-65536);
