@@ -87,4 +87,20 @@
         app:layout_constraintEnd_toEndOf="@+id/alt"
         app:layout_constraintTop_toBottomOf="@+id/alt" />
 
+    <TextView
+        android:id="@+id/scrolling_text"
+        android:layout_width="250dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="104dp"
+        android:ellipsize="marquee"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:scrollHorizontally="true"
+        android:singleLine="true"
+        android:text="This is a scrolling text."
+        android:textSize="24sp"
+        app:layout_constraintBottom_toTopOf="@+id/alt"
+        app:layout_constraintStart_toEndOf="@+id/engOn" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

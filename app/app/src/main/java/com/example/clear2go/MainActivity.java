@@ -32,7 +32,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 
 public class MainActivity extends AppCompatActivity {
-    private FirebaseFirestore database;
+    private FirebaseFirestore db;
     private ActivityMainBinding binding;
     private FirebaseAuth mAuth;
     private FirebaseAnalytics mFirebaseAnalytics;

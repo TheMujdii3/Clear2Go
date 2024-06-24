@@ -42,6 +42,7 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
     String avion;
     Calendar calendar;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -285,6 +286,7 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                         finish();
                     }
                 });
+        binding.scrollingText.isSelected()=false;
     }
 
 
