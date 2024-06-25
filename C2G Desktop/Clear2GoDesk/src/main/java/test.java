@@ -1,11 +1,12 @@
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-
+import com.google.firebase.*;
 public class test extends JFrame {
     private JButton button1;
     private JPanel panel1;
     private JLabel pana;
+
 
     public test() {
         super("Simple Form");
@@ -17,7 +18,7 @@ public class test extends JFrame {
         panel1.add(pana);
         setContentPane(panel1);
         // ... (rest of the code)
-
+        pana.setVisible(true);
         button1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {

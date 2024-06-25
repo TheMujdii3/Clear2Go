@@ -8,14 +8,6 @@
     <properties/>
     <border type="none"/>
     <children>
-      <component id="d835f" class="javax.swing.JLabel" binding="pana">
-        <constraints>
-          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Ce fraieri ba"/>
-        </properties>
-      </component>
       <component id="2fd66" class="javax.swing.JButton" binding="button1" custom-create="true" default-binding="true">
         <constraints>
           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
@@ -24,6 +16,17 @@
           <hideActionText value="false"/>
           <text value="Button"/>
           <verticalAlignment value="1"/>
+        </properties>
+      </component>
+      <component id="d835f" class="javax.swing.JLabel" binding="pana">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="4" hsize-policy="4" anchor="0" fill="0" indent="0" use-parent-layout="false">
+            <maximum-size width="50" height="100"/>
+          </grid>
+        </constraints>
+        <properties>
+          <foreground color="-12069847"/>
+          <text value="Ce fraieri ba"/>
         </properties>
       </component>
     </children>
