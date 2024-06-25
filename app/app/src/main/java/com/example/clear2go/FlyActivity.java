@@ -286,7 +286,20 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
                         finish();
                     }
                 });
-        binding.scrollingText.isSelected()=false;
+
+        binding.scrollingText.setSelected(true);
+        FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Mesaj aeronave").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                binding.scrollingText.setText(dataSnapshot.getValue().toString());
+                binding.scrollingText.setSelected(true);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
 

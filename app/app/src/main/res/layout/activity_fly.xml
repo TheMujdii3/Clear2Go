@@ -98,8 +98,9 @@
         android:marqueeRepeatLimit="marquee_forever"
         android:scrollHorizontally="true"
         android:singleLine="true"
-        android:text="This is a scrolling text."
+        android:text="This is a scrolling text.dadwadwadawdwadwadadwadawdawdwadawdsadwadwa"
         android:textSize="24sp"
+        android:textDirection="ltr"
         app:layout_constraintBottom_toTopOf="@+id/alt"
         app:layout_constraintStart_toEndOf="@+id/engOn" />
 
