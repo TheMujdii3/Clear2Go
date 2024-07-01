@@ -51,8 +51,7 @@
               "ViewState": "AQIAAAAAAAAAAAAAAAAAABIAAAAEAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2024-06-28T08:15:17.735Z",
-              "IsPinned": true,
-              "EditorCaption": ""
+              "IsPinned": true
             },
             {
               "$type": "Document",
@@ -64,8 +63,7 @@
               "RelativeToolTip": "src\\GoogleMapsLoader.js",
               "ViewState": "AQIAAAMAAAAAAAAAAAAAAAkAAAAnAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2024-07-01T16:10:22.631Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-07-01T16:10:22.631Z"
             },
             {
               "$type": "Document",
@@ -77,8 +75,7 @@
               "RelativeToolTip": "src\\usePlaneData.js",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAA0AAAAEAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2024-06-28T10:45:37.053Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-28T10:45:37.053Z"
             },
             {
               "$type": "Document",
@@ -88,7 +85,7 @@
               "RelativeDocumentMoniker": "src\\MapComponent.js",
               "ToolTip": "D:\\Clear2Go\\clear2go_twr3\\src\\MapComponent.js",
               "RelativeToolTip": "src\\MapComponent.js",
-              "ViewState": "AQIAAD8AAAAAAAAAAAAAAEcAAAAkAAAA",
+              "ViewState": "AQIAAEIAAAAAAAAAAAAAAEcAAAAdAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
               "WhenOpened": "2024-06-28T08:24:48.729Z",
               "EditorCaption": ""
@@ -115,8 +112,7 @@
               "RelativeToolTip": "src\\ControlPage.js",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAABkAAAAJAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2024-06-28T08:22:43.909Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-28T08:22:43.909Z"
             },
             {
               "$type": "Document",
@@ -128,8 +124,7 @@
               "RelativeToolTip": "src\\firebase-config.js",
               "ViewState": "AQIAAAAAAAAAAAAAAAAAAA4AAAAYAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001646|",
-              "WhenOpened": "2024-06-28T08:15:39.278Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-06-28T08:15:39.278Z"
             }
           ]
         }

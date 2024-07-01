@@ -69,7 +69,7 @@ const MapContainer = () => {
                 const plane = planes[planeKey];
                 return new BitmapLayer({
                     id: `plane-${planeKey}`,
-                    image: './plane2',  // Replace with the path to your plane image
+                    image:'./plane2.png',  // Replace with the path to your plane image
                     bounds: [
                         [plane.lng - 0.01, plane.lat - 0.01],
                         [plane.lng + 0.01, plane.lat + 0.01],
