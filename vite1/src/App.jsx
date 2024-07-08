@@ -1,5 +1,6 @@
 import  { Fragment, useEffect, useRef, useState } from "react";
 import {
+    // eslint-disable-next-line no-unused-vars
     GoogleMap,
     useLoadScript,
 } from "@react-google-maps/api";
@@ -17,6 +18,7 @@ const customOverlayData = {
 };
 
 function App() {
+    // eslint-disable-next-line no-unused-vars
     const { isLoaded } = useLoadScript({
         googleMapsApiKey: import.meta.env.VITE_MAP_API_KEY,
     });
