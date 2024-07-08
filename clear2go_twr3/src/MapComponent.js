@@ -1,17 +1,12 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { GoogleMapsOverlay } from '@deck.gl/google-maps';
+import React, { useEffect, useRef } from 'react';
 import { Loader } from '@googlemaps/js-api-loader';
-import { BitmapLayer } from '@deck.gl/layers';
 import { getDatabase, ref, onValue } from 'firebase/database';
 
-const GOOGLE_MAPS_API_KEY = 'AIzaSyApneNViwqMo-I_W5I_7hryJQcuwK_y8Uo';  // Replace with your API key
+const GOOGLE_MAPS_API_KEY = 'AIzaSyApneNViwqMo-I_W5I_7hryJQcuwK_y8Uo';
 
 const MapContainer = () => {
-    const mapRef = useRef(null);  // Reference for the map container
-    const overlayRef = useRef(null);  // Reference for Deck.gl overlay
-    const [planes, setPlanes] = useState({});  // State for planes data
+    const mapRef = useRef(null); // Reference for the map container
 
-    // Initialize the Google Maps and Deck.gl overlay
     useEffect(() => {
         const loader = new Loader({
             apiKey: GOOGLE_MAPS_API_KEY,
@@ -25,66 +20,36 @@ const MapContainer = () => {
                 zoom: 10,
             });
 
-            overlayRef.current = new GoogleMapsOverlay({
-                layers: [],
+            const db = getDatabase();
+            const positionsRef = ref(db, 'Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane');
+
+            onValue(positionsRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    snapshot.forEach((planeSnapshot) => {
+                        const lat = planeSnapshot.child('lat').val();
+                        const lng = planeSnapshot.child('lng').val();
+
+                        // Create a marker for each plane
+                        const marker = new google.maps.Marker({
+                            position: { lat, lng },
+                            map,
+                            icon: {
+                                url: './plane2.png', // Replace with your plane image path
+                                scaledSize: new google.maps.Size(32, 32), // Adjust the size as needed
+                            },
+                        });
+                    });
+                }
             });
 
-            overlayRef.current.setMap(map);
-
-            return () => overlayRef.current.setMap(null);
+            return () => {
+                // Clean up any resources if necessary
+            };
         });
     }, []);
 
-    // Fetch planes data from Firebase and update state
-    useEffect(() => {
-        const db = getDatabase();
-        const positionsRef = ref(db, 'Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane');
-
-        const unsubscribe = onValue(positionsRef, (snapshot) => {
-            if (snapshot.exists()) {
-                const updatedPlanes = {};
-                snapshot.forEach((planeSnapshot) => {
-                    const planeKey = planeSnapshot.key;
-                    const lat = planeSnapshot.child('lat').val();
-                    const lng = planeSnapshot.child('lng').val();
-                    const heading = planeSnapshot.child('heading').val();
-
-                    updatedPlanes[planeKey] = {
-                        lat,
-                        lng,
-                        heading,
-                    };
-                });
-                setPlanes(updatedPlanes);
-            }
-        });
-
-        return () => unsubscribe();
-    }, []);
-
-    // Update Deck.gl overlay layers when planes data changes
-    useEffect(() => {
-        if (overlayRef.current) {
-            const layers = Object.keys(planes).map((planeKey) => {
-                const plane = planes[planeKey];
-                return new BitmapLayer({
-                    id: `plane-${planeKey}`,
-                    image:'./plane2.png',  // Replace with the path to your plane image
-                    bounds: [
-                        [plane.lng - 0.01, plane.lat - 0.01],
-                        [plane.lng + 0.01, plane.lat + 0.01],
-                    ],  // Example bounds around the plane's location
-                    opacity: 1,
-                    getPixelOffset: () => [0, 0],
-                });
-            });
-
-            overlayRef.current.setProps({ layers });
-        }
-    }, [planes]);
-    //bam
     return (
-        <div style={{ width: '100%', height: '100vh' }}>
+        <div style={{ width: '100%', height: '100vh', position: 'relative' }}>
             <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
         </div>
     );
