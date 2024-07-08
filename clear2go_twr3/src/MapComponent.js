@@ -82,7 +82,7 @@ const MapContainer = () => {
             overlayRef.current.setProps({ layers });
         }
     }, [planes]);
-
+    //bam
     return (
         <div style={{ width: '100%', height: '100vh' }}>
             <div ref={mapRef} style={{ width: '100%', height: '100%' }} />
