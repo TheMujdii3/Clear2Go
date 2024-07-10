@@ -1,8 +1,7 @@
-import { Fragment, useEffect, useRef, useState } from "react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useLoadScript } from "@react-google-maps/api";
 import { initializeApp } from "firebase/app";
 import { getDatabase, ref, onValue } from "firebase/database";
-import "./App.css";
 import planeImage from './plane2.png';
 
 const firebaseConfig = {
@@ -18,7 +17,7 @@ const firebaseConfig = {
 
 function App() {
     const { isLoaded } = useLoadScript({
-        googleMapsApiKey: import.meta.env.VITE_MAP_API_KEY,
+        googleMapsApiKey: import.meta.env.VITE_MAP_API_KEY, // Replace with your API key
     });
     const mapRef = useRef(null);
     const [map, setMap] = useState(null);
@@ -47,6 +46,7 @@ function App() {
     useEffect(() => {
         if (!map) return;
 
+        // Define CustomOverlay class
         class CustomOverlay extends window.google.maps.OverlayView {
             constructor(bounds, image) {
                 super();
@@ -89,8 +89,8 @@ function App() {
                 const div = this.div;
                 div.style.left = sw.x + 'px';
                 div.style.top = ne.y + 'px';
-                div.style.width = ne.x - sw.x + 'px';
-                div.style.height = sw.y - ne.y + 'px';
+                div.style.width = (ne.x - sw.x) + 'px';
+                div.style.height = (sw.y - ne.y) + 'px';
             }
 
             onRemove() {
@@ -99,8 +99,14 @@ function App() {
                     this.div = null;
                 }
             }
+
+            updateBounds(newBounds) {
+                this.bounds = newBounds;
+                this.draw();
+            }
         }
 
+        // Firebase listener and overlay management
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const positionsRef = ref(db, 'Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane');
@@ -119,7 +125,6 @@ function App() {
                     const lat = planeSnapshot.child('lat').val();
                     const lng = planeSnapshot.child('lng').val();
                     const planeKey = planeSnapshot.key;
-
                     const bounds = {
                         north: lat + 0.05,
                         south: lat - 0.05,
@@ -127,9 +132,13 @@ function App() {
                         west: lng - 0.05,
                     };
 
+                    // Create new overlay
                     const overlay = new CustomOverlay(bounds, planeImage);
                     overlay.setMap(map);
                     newOverlays[planeKey] = overlay;
+
+                    // Example: Animate overlay to new position
+                    animateOverlay(overlay, bounds);
                 });
 
                 setPlaneOverlays(newOverlays);
@@ -149,10 +158,37 @@ function App() {
         };
     }, [map]);
 
+    const animateOverlay = (overlay, newBounds) => {
+        const startBounds = overlay.bounds;
+        const startTime = performance.now();
+        const duration = 500; // Animation duration in ms
+
+        const animate = (time) => {
+            const t = Math.min((time - startTime) / duration, 1); // Linear interpolation factor (0 to 1)
+
+            const interpolate = (start, end) => start + t * (end - start);
+
+            const currentBounds = {
+                north: interpolate(startBounds.north, newBounds.north),
+                south: interpolate(startBounds.south, newBounds.south),
+                east: interpolate(startBounds.east, newBounds.east),
+                west: interpolate(startBounds.west, newBounds.west),
+            };
+
+            overlay.updateBounds(currentBounds);
+
+            if (t < 1) {
+                requestAnimationFrame(animate);
+            }
+        };
+
+        requestAnimationFrame(animate);
+    };
+
     return (
         <Fragment>
             <div className="container">
-                <h1 className="text-center">Puii mei finally it exists</h1>
+                <h1 className="text-center">Dynamic Plane Overlays</h1>
                 <div style={{ height: "90vh", width: "100%" }} ref={mapRef}></div>
             </div>
         </Fragment>
