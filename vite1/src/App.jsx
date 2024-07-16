@@ -21,7 +21,7 @@ function App() {
     });
     const mapRef = useRef(null);
     const [map, setMap] = useState(null);
-    const [planeOverlays, setPlaneOverlays] = useState({});
+    const [planeOverlays, setPlaneOverlays] = useState(new Map());
 
     useEffect(() => {
         if (!isLoaded || !mapRef.current) return;
@@ -41,7 +41,7 @@ function App() {
                 mapRef.current = null;
             }
         };
-    }, [isLoaded]);
+    }, [isLoaded, map]);
 
     useEffect(() => {
         if (!map) return;
@@ -94,7 +94,7 @@ function App() {
             }
 
             onRemove() {
-                if (this.div) {
+                if (this.div && this.div.parentNode) {
                     this.div.parentNode.removeChild(this.div);
                     this.div = null;
                 }
@@ -103,6 +103,33 @@ function App() {
             updateBounds(newBounds) {
                 this.bounds = newBounds;
                 this.draw();
+            }
+
+            animateToPosition(newBounds) {
+                const startBounds = this.bounds;
+                const startTime = performance.now();
+                const duration = 500; // Animation duration in ms
+
+                const animate = (time) => {
+                    const t = Math.min((time - startTime) / duration, 1); // Linear interpolation factor (0 to 1)
+
+                    const interpolate = (start, end) => start + t * (end - start);
+
+                    const currentBounds = {
+                        north: interpolate(startBounds.north, newBounds.north),
+                        south: interpolate(startBounds.south, newBounds.south),
+                        east: interpolate(startBounds.east, newBounds.east),
+                        west: interpolate(startBounds.west, newBounds.west),
+                    };
+
+                    this.updateBounds(currentBounds);
+
+                    if (t < 1) {
+                        requestAnimationFrame(animate);
+                    }
+                };
+
+                requestAnimationFrame(animate);
             }
         }
 
@@ -113,32 +140,42 @@ function App() {
 
         const handleValueChange = (snapshot) => {
             if (snapshot.exists()) {
-                const newOverlays = {};
+                const newOverlays = new Map(planeOverlays); // Copy current overlays
 
-                // Remove existing overlays
-                Object.values(planeOverlays).forEach(overlay => {
-                    overlay.setMap(null);
-                    overlay.onRemove();
+                // Remove overlays that are not in the new data
+                newOverlays.forEach((overlay, planeKey) => {
+                        overlay.setMap(null);
+                        overlay.onRemove();
+                        newOverlays.delete(planeKey);
+
                 });
 
+                // Update or create overlays from snapshot data
                 snapshot.forEach((planeSnapshot) => {
+                    const planeKey = planeSnapshot.key;
                     const lat = planeSnapshot.child('lat').val();
                     const lng = planeSnapshot.child('lng').val();
-                    const planeKey = planeSnapshot.key;
                     const bounds = {
                         north: lat + 0.05,
                         south: lat - 0.05,
                         east: lng + 0.05,
                         west: lng - 0.05,
                     };
+                    newOverlays.forEach((CustomOverlay) => {
+                        console.log(CustomOverlay.key);
+                    });
 
-                    // Create new overlay
-                    const overlay = new CustomOverlay(bounds, planeImage);
-                    overlay.setMap(map);
-                    newOverlays[planeKey] = overlay;
-
-                    // Example: Animate overlay to new position
-                    animateOverlay(overlay, bounds);
+                    if (newOverlays.has(planeKey)) {
+                        // Overlay already exists, animate to new position
+                        newOverlays.get(planeKey).setMap(null);
+                        newOverlays.get(planeKey).onRemove();
+                        newOverlays.delete(planeKey);
+                    } else {
+                        // Create new overlay
+                        const overlay = new CustomOverlay(bounds, planeImage);
+                        overlay.setMap(map);
+                        newOverlays.set(planeKey, overlay);
+                    }
                 });
 
                 setPlaneOverlays(newOverlays);
@@ -150,46 +187,21 @@ function App() {
         // Cleanup the listener on unmount
         return () => {
             unsubscribe();
-            Object.values(planeOverlays).forEach(overlay => {
+            planeOverlays.forEach(overlay => {
                 overlay.setMap(null);
                 overlay.onRemove();
             });
-            setPlaneOverlays({});
+            setPlaneOverlays(new Map());
         };
-    }, [map]);
-
-    const animateOverlay = (overlay, newBounds) => {
-        const startBounds = overlay.bounds;
-        const startTime = performance.now();
-        const duration = 500; // Animation duration in ms
-
-        const animate = (time) => {
-            const t = Math.min((time - startTime) / duration, 1); // Linear interpolation factor (0 to 1)
-
-            const interpolate = (start, end) => start + t * (end - start);
-
-            const currentBounds = {
-                north: interpolate(startBounds.north, newBounds.north),
-                south: interpolate(startBounds.south, newBounds.south),
-                east: interpolate(startBounds.east, newBounds.east),
-                west: interpolate(startBounds.west, newBounds.west),
-            };
-
-            overlay.updateBounds(currentBounds);
-
-            if (t < 1) {
-                requestAnimationFrame(animate);
-            }
-        };
-
-        requestAnimationFrame(animate);
-    };
+    }, [map, isLoaded]);
 
     return (
         <Fragment>
-            <div className="container">
-                <h1 className="text-center">Dynamic Plane Overlays</h1>
-                <div style={{ height: "90vh", width: "100%" }} ref={mapRef}></div>
+            <div className="outer-container">
+                <div className="container">
+                    <h1>Clear2Go-Map</h1>
+                    <div style={{ height: "90vh", width: "140vh" }} ref={mapRef}></div>
+                </div>
             </div>
         </Fragment>
     );
