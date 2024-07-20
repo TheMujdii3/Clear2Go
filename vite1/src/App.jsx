@@ -48,10 +48,11 @@ function App() {
 
         // Define CustomOverlay class
         class CustomOverlay extends window.google.maps.OverlayView {
-            constructor(bounds, image) {
+            constructor(bounds, image, heading) {
                 super();
                 this.bounds = bounds;
                 this.image = image;
+                this.heading = heading;
                 this.div = null;
             }
 
@@ -67,6 +68,7 @@ function App() {
                 img.style.height = '100%';
                 img.style.position = 'absolute';
                 img.style.visibility = 'visible';
+                img.style.transform = `rotate(${this.heading}deg)`;
 
                 div.appendChild(img);
                 this.div = div;
@@ -105,8 +107,19 @@ function App() {
                 this.draw();
             }
 
-            animateToPosition(newBounds) {
+            updateHeading(newHeading) {
+                this.heading = newHeading;
+                if (this.div) {
+                    const img = this.div.querySelector('img');
+                    if (img) {
+                        img.style.transform = `rotate(${this.heading}deg)`;
+                    }
+                }
+            }
+
+            animateToPosition(newBounds, newHeading) {
                 const startBounds = this.bounds;
+                const startHeading = this.heading;
                 const startTime = performance.now();
                 const duration = 500; // Animation duration in ms
 
@@ -122,7 +135,10 @@ function App() {
                         west: interpolate(startBounds.west, newBounds.west),
                     };
 
+                    const currentHeading = interpolate(startHeading, newHeading);
+
                     this.updateBounds(currentBounds);
+                    this.updateHeading(currentHeading);
 
                     if (t < 1) {
                         requestAnimationFrame(animate);
@@ -140,45 +156,42 @@ function App() {
 
         const handleValueChange = (snapshot) => {
             if (snapshot.exists()) {
-                const newOverlays = new Map(planeOverlays); // Copy current overlays
+                const newOverlays = new Map(); // New map for updated overlays
 
-                // Remove overlays that are not in the new data
-                newOverlays.forEach((overlay, planeKey) => {
-                        overlay.setMap(null);
-                        overlay.onRemove();
-                        newOverlays.delete(planeKey);
-
-                });
-
-                // Update or create overlays from snapshot data
                 snapshot.forEach((planeSnapshot) => {
                     const planeKey = planeSnapshot.key;
                     const lat = planeSnapshot.child('lat').val();
                     const lng = planeSnapshot.child('lng').val();
+                    const heading = planeSnapshot.child('heading').val();
                     const bounds = {
                         north: lat + 0.05,
                         south: lat - 0.05,
                         east: lng + 0.05,
                         west: lng - 0.05,
                     };
-                    newOverlays.forEach((CustomOverlay) => {
-                        console.log(CustomOverlay.key);
-                    });
 
-                    if (newOverlays.has(planeKey)) {
-                        // Overlay already exists, animate to new position
-                        newOverlays.get(planeKey).setMap(null);
-                        newOverlays.get(planeKey).onRemove();
-                        newOverlays.delete(planeKey);
+                    if (planeOverlays.has(planeKey)) {
+                        // Overlay already exists, update position and heading
+                        const overlay = planeOverlays.get(planeKey);
+                        overlay.animateToPosition(bounds, heading);
+                        newOverlays.set(planeKey, overlay);
                     } else {
                         // Create new overlay
-                        const overlay = new CustomOverlay(bounds, planeImage);
+                        const overlay = new CustomOverlay(bounds, planeImage, heading);
                         overlay.setMap(map);
                         newOverlays.set(planeKey, overlay);
                     }
                 });
 
-                setPlaneOverlays(newOverlays);
+                // Remove overlays that are not in the new data
+                planeOverlays.forEach((overlay, planeKey) => {
+                    if (!newOverlays.has(planeKey)) {
+                        overlay.setMap(null);
+                        overlay.onRemove();
+                    }
+                });
+
+                setPlaneOverlays(newOverlays); // Update state with new overlays
             }
         };
 
@@ -194,6 +207,36 @@ function App() {
             setPlaneOverlays(new Map());
         };
     }, [map, isLoaded]);
+
+    useEffect(() => {
+        if (!map) return;
+
+        const handleZoomChange = () => {
+            const zoom = map.getZoom();
+            const targetDimension = 0.1 * Math.pow(2, 10 - zoom); // Adjusted for smooth transition
+
+            planeOverlays.forEach(overlay => {
+                const bounds = overlay.bounds;
+                const centerLat = (bounds.north + bounds.south) / 2;
+                const centerLng = (bounds.east + bounds.west) / 2;
+
+                const newBounds = {
+                    north: centerLat + targetDimension / 2,
+                    south: centerLat - targetDimension / 2,
+                    east: centerLng + targetDimension / 2,
+                    west: centerLng - targetDimension / 2,
+                };
+
+                overlay.animateToPosition(newBounds, overlay.heading);
+            });
+        };
+
+        map.addListener('zoom_changed', handleZoomChange);
+
+        return () => {
+            window.google.maps.event.clearListeners(map, 'zoom_changed');
+        };
+    }, [map, planeOverlays]);
 
     return (
         <Fragment>
