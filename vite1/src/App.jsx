@@ -22,6 +22,7 @@ function App() {
     const mapRef = useRef(null);
     const [map, setMap] = useState(null);
     const [planeOverlays, setPlaneOverlays] = useState(new Map());
+    const [planesMap, setPlanesMap] = useState(new Map());
 
     useEffect(() => {
         if (!isLoaded || !mapRef.current) return;
@@ -156,13 +157,18 @@ function App() {
 
         const handleValueChange = (snapshot) => {
             if (snapshot.exists()) {
-                const newOverlays = new Map(); // New map for updated overlays
+                const newPlanesMap = new Map();
+                const newOverlays = new Map();
 
                 snapshot.forEach((planeSnapshot) => {
                     const planeKey = planeSnapshot.key;
                     const lat = planeSnapshot.child('lat').val();
                     const lng = planeSnapshot.child('lng').val();
                     const heading = planeSnapshot.child('heading').val();
+                    const position = new window.google.maps.LatLng(lat, lng);
+
+                    newPlanesMap.set(planeKey, { lat, lng, heading, plane: planeKey });
+
                     const bounds = {
                         north: lat + 0.05,
                         south: lat - 0.05,
@@ -171,10 +177,10 @@ function App() {
                     };
 
                     if (planeOverlays.has(planeKey)) {
-                        // Overlay already exists, update position and heading
+                        // Update existing overlay
                         const overlay = planeOverlays.get(planeKey);
                         overlay.animateToPosition(bounds, heading);
-                        newOverlays.set(planeKey, overlay);
+
                     } else {
                         // Create new overlay
                         const overlay = new CustomOverlay(bounds, planeImage, heading);
@@ -186,12 +192,14 @@ function App() {
                 // Remove overlays that are not in the new data
                 planeOverlays.forEach((overlay, planeKey) => {
                     if (!newOverlays.has(planeKey)) {
+                        overlay.remove();
                         overlay.setMap(null);
                         overlay.onRemove();
                     }
                 });
 
-                setPlaneOverlays(newOverlays); // Update state with new overlays
+                setPlanesMap(newPlanesMap);
+                setPlaneOverlays(newOverlays);
             }
         };
 
@@ -205,6 +213,7 @@ function App() {
                 overlay.onRemove();
             });
             setPlaneOverlays(new Map());
+            setPlanesMap(new Map());
         };
     }, [map, isLoaded]);
 
