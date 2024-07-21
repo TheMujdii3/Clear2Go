@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useLoadScript } from "@react-google-maps/api";
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, onValue } from "firebase/database";
+import { getDatabase, ref, get } from "firebase/database";
 import planeImage from './plane2.png';
 
 const firebaseConfig = {
@@ -155,7 +155,8 @@ function App() {
         const db = getDatabase(app);
         const positionsRef = ref(db, 'Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane');
 
-        const handleValueChange = (snapshot) => {
+        const fetchAndUpdateData = async () => {
+            const snapshot = await get(positionsRef);
             if (snapshot.exists()) {
                 const newPlanesMap = new Map();
                 const newOverlays = new Map();
@@ -203,11 +204,11 @@ function App() {
             }
         };
 
-        const unsubscribe = onValue(positionsRef, handleValueChange);
+        const intervalId = setInterval(fetchAndUpdateData, 5000); // Fetch data every second
 
-        // Cleanup the listener on unmount
+        // Cleanup the interval on unmount
         return () => {
-            unsubscribe();
+            clearInterval(intervalId);
             planeOverlays.forEach(overlay => {
                 overlay.setMap(null);
                 overlay.onRemove();
