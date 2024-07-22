@@ -48,11 +48,12 @@ function App() {
 
         // Define CustomOverlay class
         class CustomOverlay extends window.google.maps.OverlayView {
-            constructor(bounds, image, heading) {
+            constructor(bounds, image, heading, planeKey) {
                 super();
                 this.bounds = bounds;
                 this.image = image;
                 this.heading = heading;
+                this.planeKey = planeKey;
                 this.div = null;
             }
 
@@ -61,6 +62,17 @@ function App() {
                 div.style.borderStyle = 'none';
                 div.style.borderWidth = '0px';
                 div.style.position = 'absolute';
+
+                const label = document.createElement('div');
+                label.innerText = this.planeKey;
+                label.style.position = 'absolute';
+                label.style.top = '-20px';
+                label.style.left = '0';
+                label.style.width = '100%';
+                label.style.textAlign = 'center';
+                label.style.color = 'black';
+                label.style.fontWeight = 'bold';
+                label.style.backgroundColor = 'white';
 
                 const img = document.createElement('img');
                 img.src = this.image;
@@ -71,6 +83,7 @@ function App() {
                 img.style.transform = `rotate(${this.heading}deg)`;
                 img.style.transition = 'transform 0.5s, width 0.5s, height 0.5s'; // Add transition
 
+                div.appendChild(label);
                 div.appendChild(img);
                 this.div = div;
 
@@ -181,7 +194,7 @@ function App() {
                     };
 
                     // Create new overlay
-                    const overlay = new CustomOverlay(bounds, planeImage, heading);
+                    const overlay = new CustomOverlay(bounds, planeImage, heading, planeKey);
                     overlay.setMap(map);
                     newOverlays.push(overlay);
                 });
