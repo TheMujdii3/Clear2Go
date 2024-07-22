@@ -293,7 +293,7 @@ function App() {
                         }}
                         onClick={handleButtonClick}
                     >
-                        {isInputVisible ? "Hide Input" : "Show Input"}
+                        {isInputVisible ? "Inchide notam" : "Deschide notam"}
                     </button>
                     {isInputVisible && (
                         <input
