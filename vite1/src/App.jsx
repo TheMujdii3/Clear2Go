@@ -69,6 +69,7 @@ function App() {
                 img.style.position = 'absolute';
                 img.style.visibility = 'visible';
                 img.style.transform = `rotate(${this.heading}deg)`;
+                img.style.transition = 'transform 0.5s, width 0.5s, height 0.5s'; // Add transition
 
                 div.appendChild(img);
                 this.div = div;
@@ -101,6 +102,52 @@ function App() {
                     this.div = null;
                 }
             }
+
+            updateBounds(newBounds) {
+                this.bounds = newBounds;
+                this.draw();
+            }
+
+            updateHeading(newHeading) {
+                this.heading = newHeading;
+                if (this.div) {
+                    const img = this.div.querySelector('img');
+                    if (img) {
+                        img.style.transform = `rotate(${this.heading}deg)`;
+                    }
+                }
+            }
+
+            animateToPosition(newBounds, newHeading) {
+                const startBounds = this.bounds;
+                const startHeading = this.heading;
+                const startTime = performance.now();
+                const duration = 500; // Animation duration in ms
+
+                const animate = (time) => {
+                    const t = Math.min((time - startTime) / duration, 1); // Linear interpolation factor (0 to 1)
+
+                    const interpolate = (start, end) => start + t * (end - start);
+
+                    const currentBounds = {
+                        north: interpolate(startBounds.north, newBounds.north),
+                        south: interpolate(startBounds.south, newBounds.south),
+                        east: interpolate(startBounds.east, newBounds.east),
+                        west: interpolate(startBounds.west, newBounds.west),
+                    };
+
+                    const currentHeading = interpolate(startHeading, newHeading);
+
+                    this.updateBounds(currentBounds);
+                    this.updateHeading(currentHeading);
+
+                    if (t < 1) {
+                        requestAnimationFrame(animate);
+                    }
+                };
+
+                requestAnimationFrame(animate);
+            }
         }
 
         // Firebase listener and overlay management
@@ -108,7 +155,14 @@ function App() {
         const db = getDatabase(app);
         const positionsRef = ref(db, 'Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane');
 
-        const updateOverlays = (snapshot) => {
+        const calculateOverlayDimensions = (zoom) => {
+            // Adjust this factor to change the size of the overlays based on zoom level
+            const baseDimension = 0.05; // Base dimension at zoom level 10
+            const scale = Math.pow(2, 10 - zoom);
+            return baseDimension * scale;
+        };
+
+        const updateOverlays = (snapshot, zoom) => {
             if (snapshot.exists()) {
                 const newOverlays = [];
 
@@ -118,11 +172,12 @@ function App() {
                     const lng = planeSnapshot.child('lng').val();
                     const heading = planeSnapshot.child('heading').val();
 
+                    const dimension = calculateOverlayDimensions(zoom);
                     const bounds = {
-                        north: lat + 0.05,
-                        south: lat - 0.05,
-                        east: lng + 0.05,
-                        west: lng - 0.05,
+                        north: lat + dimension,
+                        south: lat - dimension,
+                        east: lng + dimension,
+                        west: lng - dimension,
                     };
 
                     // Create new overlay
@@ -143,7 +198,8 @@ function App() {
         };
 
         const fetchAndUpdateData = () => {
-            onValue(positionsRef, updateOverlays, {
+            const zoom = map.getZoom();
+            onValue(positionsRef, (snapshot) => updateOverlays(snapshot, zoom), {
                 onlyOnce: true,
             });
         };
@@ -160,23 +216,7 @@ function App() {
         if (!map) return;
 
         const handleZoomChange = () => {
-            const zoom = map.getZoom();
-            const targetDimension = 0.1 * Math.pow(2, 10 - zoom); // Adjusted for smooth transition
-
-            planeOverlays.forEach(overlay => {
-                const bounds = overlay.bounds;
-                const centerLat = (bounds.north + bounds.south) / 2;
-                const centerLng = (bounds.east + bounds.west) / 2;
-
-                const newBounds = {
-                    north: centerLat + targetDimension / 2,
-                    south: centerLat - targetDimension / 2,
-                    east: centerLng + targetDimension / 2,
-                    west: centerLng - targetDimension / 2,
-                };
-
-                overlay.animateToPosition(newBounds, overlay.heading);
-            });
+            fetchAndUpdateData();
         };
 
         map.addListener('zoom_changed', handleZoomChange);
@@ -184,7 +224,7 @@ function App() {
         return () => {
             window.google.maps.event.clearListeners(map, 'zoom_changed');
         };
-    }, [map, planeOverlays]);
+    }, [map]);
 
     return (
         <Fragment>
