@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useLoadScript } from "@react-google-maps/api";
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, get } from "firebase/database";
+import { getDatabase, ref, onValue } from "firebase/database";
 import planeImage from './plane2.png';
 
 const firebaseConfig = {
@@ -21,8 +21,7 @@ function App() {
     });
     const mapRef = useRef(null);
     const [map, setMap] = useState(null);
-    const [planeOverlays, setPlaneOverlays] = useState(new Map());
-    const [planesMap, setPlanesMap] = useState(new Map());
+    const [planeOverlays, setPlaneOverlays] = useState([]);
 
     useEffect(() => {
         if (!isLoaded || !mapRef.current) return;
@@ -102,52 +101,6 @@ function App() {
                     this.div = null;
                 }
             }
-
-            updateBounds(newBounds) {
-                this.bounds = newBounds;
-                this.draw();
-            }
-
-            updateHeading(newHeading) {
-                this.heading = newHeading;
-                if (this.div) {
-                    const img = this.div.querySelector('img');
-                    if (img) {
-                        img.style.transform = `rotate(${this.heading}deg)`;
-                    }
-                }
-            }
-
-            animateToPosition(newBounds, newHeading) {
-                const startBounds = this.bounds;
-                const startHeading = this.heading;
-                const startTime = performance.now();
-                const duration = 500; // Animation duration in ms
-
-                const animate = (time) => {
-                    const t = Math.min((time - startTime) / duration, 1); // Linear interpolation factor (0 to 1)
-
-                    const interpolate = (start, end) => start + t * (end - start);
-
-                    const currentBounds = {
-                        north: interpolate(startBounds.north, newBounds.north),
-                        south: interpolate(startBounds.south, newBounds.south),
-                        east: interpolate(startBounds.east, newBounds.east),
-                        west: interpolate(startBounds.west, newBounds.west),
-                    };
-
-                    const currentHeading = interpolate(startHeading, newHeading);
-
-                    this.updateBounds(currentBounds);
-                    this.updateHeading(currentHeading);
-
-                    if (t < 1) {
-                        requestAnimationFrame(animate);
-                    }
-                };
-
-                requestAnimationFrame(animate);
-            }
         }
 
         // Firebase listener and overlay management
@@ -155,20 +108,15 @@ function App() {
         const db = getDatabase(app);
         const positionsRef = ref(db, 'Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane');
 
-        const fetchAndUpdateData = async () => {
-            const snapshot = await get(positionsRef);
+        const updateOverlays = (snapshot) => {
             if (snapshot.exists()) {
-                const newPlanesMap = new Map();
-                const newOverlays = new Map();
+                const newOverlays = [];
 
                 snapshot.forEach((planeSnapshot) => {
                     const planeKey = planeSnapshot.key;
                     const lat = planeSnapshot.child('lat').val();
                     const lng = planeSnapshot.child('lng').val();
                     const heading = planeSnapshot.child('heading').val();
-                    const position = new window.google.maps.LatLng(lat, lng);
-
-                    newPlanesMap.set(planeKey, { lat, lng, heading, plane: planeKey });
 
                     const bounds = {
                         north: lat + 0.05,
@@ -177,46 +125,36 @@ function App() {
                         west: lng - 0.05,
                     };
 
-                    if (planeOverlays.has(planeKey)) {
-                        // Update existing overlay
-                        const overlay = planeOverlays.get(planeKey);
-                        overlay.animateToPosition(bounds, heading);
-
-                    } else {
-                        // Create new overlay
-                        const overlay = new CustomOverlay(bounds, planeImage, heading);
-                        overlay.setMap(map);
-                        newOverlays.set(planeKey, overlay);
-                    }
+                    // Create new overlay
+                    const overlay = new CustomOverlay(bounds, planeImage, heading);
+                    overlay.setMap(map);
+                    newOverlays.push(overlay);
                 });
 
-                // Remove overlays that are not in the new data
-                planeOverlays.forEach((overlay, planeKey) => {
-                    if (!newOverlays.has(planeKey)) {
-                        overlay.remove();
-                        overlay.setMap(null);
-                        overlay.onRemove();
-                    }
+                // Remove old overlays
+                planeOverlays.forEach((overlay) => {
+                    overlay.setMap(null);
+                    overlay.onRemove();
                 });
 
-                setPlanesMap(newPlanesMap);
+                // Update state with new overlays
                 setPlaneOverlays(newOverlays);
             }
         };
 
-        const intervalId = setInterval(fetchAndUpdateData, 5000); // Fetch data every second
+        const fetchAndUpdateData = () => {
+            onValue(positionsRef, updateOverlays, {
+                onlyOnce: true,
+            });
+        };
+
+        const intervalId = setInterval(fetchAndUpdateData, 1000); // Fetch data every second
 
         // Cleanup the interval on unmount
         return () => {
             clearInterval(intervalId);
-            planeOverlays.forEach(overlay => {
-                overlay.setMap(null);
-                overlay.onRemove();
-            });
-            setPlaneOverlays(new Map());
-            setPlanesMap(new Map());
         };
-    }, [map, isLoaded]);
+    }, [map, isLoaded, planeOverlays]);
 
     useEffect(() => {
         if (!map) return;
