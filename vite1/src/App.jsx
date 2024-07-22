@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useRef, useState } from "react";
 import { useLoadScript } from "@react-google-maps/api";
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, onValue } from "firebase/database";
+import { getDatabase, ref, onValue, set } from "firebase/database";
 import planeImage from './plane2.png';
 
 const firebaseConfig = {
@@ -22,6 +22,8 @@ function App() {
     const mapRef = useRef(null);
     const [map, setMap] = useState(null);
     const [planeOverlays, setPlaneOverlays] = useState([]);
+    const [isInputVisible, setIsInputVisible] = useState(false);
+    const [inputValue, setInputValue] = useState("");
 
     useEffect(() => {
         if (!isLoaded || !mapRef.current) return;
@@ -167,6 +169,7 @@ function App() {
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
         const positionsRef = ref(db, 'Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane');
+        const messageRef = ref(db, 'Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Mesaj aeronave');
 
         const calculateOverlayDimensions = (zoom) => {
             // Adjust this factor to change the size of the overlays based on zoom level
@@ -239,12 +242,75 @@ function App() {
         };
     }, [map]);
 
+    useEffect(() => {
+        if (!isLoaded) return;
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const messageRef = ref(db, 'Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Mesaj aeronave');
+
+        onValue(messageRef, (snapshot) => {
+            if (snapshot.exists()) {
+                setInputValue(snapshot.val());
+            }
+        });
+    }, [isLoaded]);
+
+    const handleButtonClick = () => {
+        setIsInputVisible(!isInputVisible);
+    };
+
+    const handleInputChange = (event) => {
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const messageRef = ref(db, 'Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Mesaj aeronave');
+        const newValue = event.target.value;
+        set(messageRef, newValue);
+        setInputValue(newValue);
+
+        // Update Firebase with new input value
+
+
+    };
+
     return (
         <Fragment>
             <div className="outer-container">
                 <div className="container">
                     <h1>Clear2Go-Map</h1>
                     <div style={{ height: "90vh", width: "140vh" }} ref={mapRef}></div>
+                    <button
+                        style={{
+                            position: "absolute",
+                            bottom: "20px",
+                            right: "20px",
+                            padding: "10px 20px",
+                            borderRadius: "5px",
+                            border: "none",
+                            backgroundColor: "#007bff",
+                            color: "white",
+                            cursor: "pointer",
+                        }}
+                        onClick={handleButtonClick}
+                    >
+                        {isInputVisible ? "Hide Input" : "Show Input"}
+                    </button>
+                    {isInputVisible && (
+                        <input
+                            type="text"
+                            value={inputValue}
+                            onChange={handleInputChange}
+                            style={{
+                                position: "absolute",
+                                bottom: "70px",
+                                right: "20px",
+                                padding: "10px",
+                                borderRadius: "5px",
+                                border: "1px solid #ccc",
+                                width: "200px",
+                            }}
+                        />
+                    )}
                 </div>
             </div>
         </Fragment>

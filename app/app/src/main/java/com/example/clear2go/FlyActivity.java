@@ -6,10 +6,16 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 
@@ -31,16 +37,19 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FlyActivity extends AppCompatActivity implements LocationListener {
+public class FlyActivity extends AppCompatActivity implements LocationListener{
     private FirebaseAuth firebaseAuth;
     private static final int REQUEST_LOCATION_CODE = 1;
     private LocationManager locationManager;
     ActivityFlyBinding binding;
+
     private DatabaseReference mDatabase;
     private DatabaseReference avionData;
     private DatabaseReference rq;
     String avion;
     Calendar calendar;
+
+
 
 
     @Override
@@ -52,20 +61,22 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
         setContentView(binding.getRoot());
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        Criteria crit = new Criteria();
+        crit.setAccuracy(Criteria.ACCURACY_FINE);
+        crit.setBearingAccuracy(Criteria.ACCURACY_HIGH);
+
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION_CODE);
-            locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-            if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                locationManager.requestLocationUpdates(locationManager.GPS_PROVIDER, 0, 0, this);
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
-            }else {
-                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-            }
         }
+
+
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, this);
-        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, this);
+        locationManager.getBestProvider(crit,true);
+
+
         mDatabase = FirebaseDatabase.getInstance().getReference();
         firebaseAuth = FirebaseAuth.getInstance();
         calendar = Calendar.getInstance();
@@ -248,7 +259,6 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
             @Override
             public void onClick(View v) {
                 locationManager.removeUpdates(FlyActivity.this);
-                //locationManager.removeUpdates(super.this);
                 locationManager=null;
                 mDatabase=null;
                 FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/" + avion + "/Pornire motor")
@@ -302,8 +312,6 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
         });
     }
 
-
-
     @Override
     public void onLocationChanged(@NonNull Location location) {
         binding.alt.setText(String.valueOf((int)((int)location.getAltitude()*3.28084))+"ft");
@@ -311,5 +319,9 @@ public class FlyActivity extends AppCompatActivity implements LocationListener {
         avionData.child("lat").setValue(location.getLatitude());
         avionData.child("lng").setValue(location.getLongitude());
         avionData.child("heading").setValue(location.getBearing());
+        Log.d("locatie", "bearing: "+location.getBearing());
+        Log.d("locatie", "hasBear: "+location.hasBearing());
+        Log.d("locatie", "acc: "+location.getAccuracy());
+        Log.d("locatie", "onLocationChanged: "+locationManager.getAllProviders());
     }
 }

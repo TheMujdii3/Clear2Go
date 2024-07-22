@@ -76,32 +76,20 @@ public class ProfileActivity extends AppCompatActivity {
                 Log.d(TAG, "onCancelled: database error");
             }
         });
-        /*
-        selectPlane.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedPlane = (String) parent.getItemAtPosition(position);
-                // Do something with the selectedName
-            }
 
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
-
-         */
 
 
         binding.button3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(ProfileActivity.this,"merge avionu..."+selectPlane.getSelectedItem(),Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(ProfileActivity.this, FlyActivity.class);
-                intent.putExtra("avion", (String) selectPlane.getSelectedItem());
-                startActivity(intent);
-                overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
-                finish();
+                if(selectPlane.getSelectedItem()!=null) {
+                    Toast.makeText(ProfileActivity.this, selectPlane.getSelectedItem().toString(), Toast.LENGTH_SHORT).show();
+                    Intent intent = new Intent(ProfileActivity.this, FlyActivity.class);
+                    intent.putExtra("avion", (String) selectPlane.getSelectedItem());
+                    startActivity(intent);
+                    overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
+                    finish();
+                }
             }
         });
 
