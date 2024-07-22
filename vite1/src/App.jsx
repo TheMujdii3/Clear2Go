@@ -268,7 +268,7 @@ function App() {
         set(messageRef, newValue);
         setInputValue(newValue);
 
-        // Update Firebase with new input value
+
 
 
     };
