@@ -89,5 +89,8 @@ Reposytory-ul de pe github: https://github.com/TheMujdii3/Clear2Go
 Android Studio: https://developer.android.com/studio
 Firebase: https://firebase.google.com/
 Firebase Analytics: https://firebase.google.com/docs/analytics
+
 IP aplicatie web: 89.165.219.117:5173
+
+Tutorial utilizare aplicatie web : https://drive.google.com/file/d/1xvFSC--XIOhs8RGfQ4frBat3GXSfbPH8/view?usp=sharing
 
