@@ -220,7 +220,7 @@ function App() {
             });
         };
 
-        const intervalId = setInterval(fetchAndUpdateData, 1000); // Fetch data every second
+        const intervalId = setInterval(fetchAndUpdateData, 500); // Fetch data every second
 
         // Cleanup the interval on unmount
         return () => {
