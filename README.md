@@ -2,7 +2,7 @@
 
 Clear2Go
 
-Clear2Go este o soluție inovatoare pentru rezolvarea problemelor persistente în comunicațiile radio. Aplicația urmărește reducerea acestora și îmbunătățirea cooperării dintre piloți și controlorii de trafic aerian. Ea gestionează autorizațiile emise de turnurile de control ale aerodromurilor civile pentru avioane.
+Clear2Go este o soluție inovatoare pentru rezolvarea problemelor persistente în comunicațiile radio.Aplicația urmărește completarea acestora și îmbunătățirea cooperării dintre piloți și controlorii de trafic aerian. Ea gestionează autorizațiile emise de turnurile de control ale aerodromurilor civile pentru avioane.
 
 I. Aplicația pentru Mobil
 
