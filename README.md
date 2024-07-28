@@ -84,8 +84,7 @@ Echipa noastră a decis să adopte GitHub ca sistem de versionare pentru proiect
 
 
 Instalarea aplicatiei Clear2Go:
-	Aplicatia poate fi instalată foarte simplu prin descărcarea si rularea apk-ului de pe github aflat la adresa: https://github.com/TheMujdii3/Clear2Go/releases/tag/Judeteana
-
+	Aplicatia poate fi instalată foarte simplu prin descărcarea si rularea apk-ului de pe github aflat la adresa: https://github.com/TheMujdii3/Clear2Go/releases/tag/Nationala
 Acest proiect a fost realizat de către Neculai-Mirea Andrei-Laurențiu și Dunel Ștefan-Octavian, elevi în clasa a X-a A la Colegiul Național Mihai Viteazul din Slobozia, județul Ialomița. Vă mulțumim pentru atenția și timpul acordat parcurgerii acestui document!
 
 Resure:
