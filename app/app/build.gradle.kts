@@ -66,7 +66,8 @@ dependencies {
     implementation ("com.github.Gruzer:simple-gauge-android:0.3.1")
     implementation ("com.google.maps.android:android-maps-utils:3.8.2")
     implementation ("com.google.firebase:firebase-analytics")
-
+    implementation ("com.google.firebase:firebase-auth-ktx")
+    implementation ("com.google.gms:google-services:4.3.15")
 
 
 }

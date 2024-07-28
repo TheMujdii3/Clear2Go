@@ -119,6 +119,7 @@ public class ProfileActivity extends AppCompatActivity {
             firebaseAuth.signOut();
             checkUser();
         }
+        /*
         if(item.getItemId()==R.id.User)
         {
             Intent intent = new Intent(ProfileActivity.this, User_properties.class);
@@ -127,6 +128,8 @@ public class ProfileActivity extends AppCompatActivity {
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             finish();
         }
+
+         */
 
         return true;
     }

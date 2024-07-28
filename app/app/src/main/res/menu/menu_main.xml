@@ -4,10 +4,6 @@
     tools:context="com.example.clear2go.ProfileActivity">
 
     <item
-        android:id="@+id/User"
-        android:orderInCategory="100"
-        android:title="User" />
-    <item
         android:id="@+id/idk1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
