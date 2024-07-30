@@ -288,6 +288,14 @@ public class FlyActivity extends AppCompatActivity implements LocationListener{
                     public void handleOnBackPressed() {
                         FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/" + avion + "/Pornire motor")
                                 .setValue(false);
+                        FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/" + avion + "/Intrare si aliniere")
+                                .setValue(false);
+                        FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/" + avion + "/Plecare")
+                                .setValue(false);
+                        FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/" + avion + "/Rulaj")
+                                .setValue(false);
+                        FirebaseDatabase.getInstance().getReference().child("Utilizare/Aviatie/Aerodromuri/AR_AT Bucuresti/Flota/Avioane/" + avion + "/Aterizare")
+                                .setValue(false);
                         locationManager.removeUpdates(FlyActivity.this);
                         locationManager=null;
                         mDatabase=null;
